@@ -1,0 +1,247 @@
+nh3d
+# 1.Nh3d data file, P Miranda August 2006, pmmiranda@fc.ul.pt
+# 2. Corrected by V. Stepanenko, June, 2007, stepanen@srcc.msu.ru
+# this is an example of nh3d.dat
+# note that all lines belonging to optional parameters may be
+# omitted and then default values are taken
+# in this file after the value of a given parameter its default
+# value is shown between (), when available.
+# order of lines is irrelevant
+#
+verbose 0 (0) level of screen output: -1(none) 0(a bit) 1(a lot) 2(all) 3 (debug)
+####################################################################
+#following parameters MUST be given:
+#grid (nx,ny,ns)
+nx 11 ! nx-1 must be fft'able (2**n * 3**k * 5**m)
+ny 11  ! ny-1 must be fft'able
+ns 52
+dx 30000.
+#6200.
+dy 30000.
+#5800.
+dt 1
+ntime 32400  !number of time steps of the experiment
+ptop  50000. !pressure at the top of the model
+#####################################################################
+sigmagrid
+0.0000
+0.0419
+0.1119
+0.1819
+0.2519
+0.3219
+0.3921
+0.4531
+0.5062
+0.5524
+0.5925
+0.6274
+0.6577
+0.6841
+0.7070
+0.7270
+0.7443
+0.7594
+0.7725
+0.7840
+0.7939
+0.8025
+0.8100
+0.8175
+0.8250
+0.8325
+0.8400
+0.8475
+0.8550
+0.8625
+0.8700
+0.8775
+0.8850
+0.8925
+0.9000
+0.9075
+0.9150
+0.9225
+0.9300
+0.9375
+0.9450
+0.9520
+0.9586
+0.9648
+0.9706
+0.9760
+0.9810
+0.9856
+0.9898
+0.9936
+0.9970
+1.0000
+#simpleatmos 273. 1.0e-4 10 0 0 1.0e5  !simplest possible profile: pot.temp_surface,N**2,U,V,RH,p_surface (all constant in vertical)
+timeini 20001101060000 ! timeini must be set before profile 
+profile
+265.    1       1       0       0
+14     14    14    14
+
+     0.      265.0     0.     8.0         0.      0.          0    0.5
+    100.     265.0    100.    8.0        100.     0.          100.  0.5
+    500.     269.0    500.    8.0        500.     0.          500.  0.5
+    1000.    274.0    1000.   8.0        1000.    0.          1000  0.45
+    2000.    278.0    2000.   8.0        2000.    0.          2000  0.4
+    3000.    282.0    3000.   8.0        3000.    0.          3000  0.35
+    4000.    286.0    4000.   8.0        4000.    0.          4000  0.3
+    5000.    290.0    5000.   8.0        5000.    0.          5000  0.25
+    6000.    294.0    6000.   8.0        6000.    0.          6000  0.2
+    7000.    298.0    7000.   8.0        7000.    0.          7000  0.15
+    8000.    302.0    8000.   8.0        8000.    0.          8000  0.1
+    9000.    306.0    9000.   8.0        9000.    0.          9000  0.05
+   10000.    310.0   10000.   8.0       10000.    0.         10000  0.05
+   11000.    314.0   11000.   8.0       11000.    0.         11000  0.05
+   12000.    318.0   12000.   8.0       12000.    0.         12000  0.05
+#####################################################################
+fngrd 'results/GABLS/gab'  ! output grid files (grd format)
+fnmap 'map/arctic_10'          ! input grid files for surface parameters (soil model)
+#fnmap 'map/lake_map'          ! input grid files for surface parameters (soil model)
+fnout 'results/GABLS/gab'  ! output data (unformatted) plus other output fields (e.g. profiles)
+fnrad 'series.rad'
+#####################################################################
+#optional parameters (all have default values)
+divrefstate .false. (.false.) !Choose false (true is not yet operational)
+ifluxcor 1 (1) !what to do about total mass (0) let it go; (1) preserve mass - generaly a good idea; (2) balance mass (not yet operational, need divrefstate=.true.)
+adjust .false. (.false.) !advanced, if .true. uses Room et al (2001) adjustment scheme
+xlatit 73.       (55.)   !latitude in degrees fcor is computed accordingly
+fcor   -999.     (-999.)
+ug0    8.0
+vg0    0.
+ifsoil 0       (0)    !switch for soil model (0-off, 1-on, 2-simple soil without heat flux)
+tfix 1        switch for simple surface with fixed temperature (if ifsoil=0, if radpar=0 and if iflake=0)
+z0hz0 .1      (1.)   z0h/z0 only used if ifsoil=1
+isqv 0       (0)    switch for water vapour (0-off, 1-on)
+isqc 0       (0)    switch for cloud water (0-off, 1-on)
+isqr 0       (0)    switch for rain water (0-off, 1-on)
+isqi 0       (0)    switch for cloud ice and snow in clouds (0-off,1-on)
+# diffusion parameters
+iodif    15      (0)    diffusion switch (0-no, 1- constant, 2- def depend., 12-deformation dep but only vertical)
+difcof   0.     (0.)   constant diffusion (to add if iodif=2)
+rikey    1.     (1.)   if 1. diffusion depends also on the richardson number
+uvdif    1.     (1.)   apply diffusion to the reference state wind (us,vs)
+tsdif    1.     (1.)   apply diffusion to the reference state theta profile (pts)
+cdcoef   0.     (0.)   drag coefficient for a bulk surface model
+iogabls  1
+#
+#####################################################################
+#topography iomtyp,hmount,xmount,ymount,hxwid,hywid,hexp
+# if iomtyp=4 (default) the grid file [fnmap].top contains the orography
+# and the rest of the parameters are not needed
+# iomtyp=1:
+#   h=hmount*(1+((x-xmount)/hxwid)**2)**(-hexp)
+# iomtyp=2:
+#   h=hmount*(1+((x-xmount)/hxwid)**2+((y-ymount)/hywid)**2)**(-hexp)
+#topography 4
+#MOUNTAIN 
+#1 1000 32000. 8000. 5000. 5000. 1.
+#
+#####################################################################
+#smoothing parameters
+numsmo   25      (0)       interval beteween smoothing, 0- no smoothing
+perdam   .true. (.true.)  smooth perturtabtions only
+dohsmo   .true. (.true.)  horizontal smoothing on (if numsmo>0)
+dovsmo   .true. (.true.)  vertical smoothing on (if numsmo>0)
+dovsmt   .true. (.true.)  vertical smoothing for pt on (if numsmo>0)
+hdampm   0.015  (0.015)   smoothing parameter for hsmo (horizontal filter) value below the absorption layer
+hdampt   0.0625 (0.0625)  smoothing parameter for hsmo maximum value at the topo of the absorption layer
+vdamp    0.001  (0.001)   smoothing parameter for vsmo (vertical filter) value below the absorption layer
+vdampt   0.001  (0.001)   smoothing parameter for vsmt maximum value at the topo of the absorption layer
+#absorption layer
+taum     1.0e8   (1.0e8)    relaxation time at the bottom of the sponge layer
+ntaut    20     (100)     relaxation time (in timesteps) at the top of the sponge layer
+zm       2000.  (8000.)   bottom of the sponge lay im meters
+zt       10000. (18000.)  top of the sponge lay
+#lateral sponge (this is needed for changing b.c. or to guarantee its maintenance in time, if -1 it is not used)
+nxsponge1 -1  (-1)
+nxsponge2 -1  (-1)
+nysponge1 -1  (-1)
+nysponge2 -1  (-1)
+ntauspon 50              ! relaxation time (in timesteps) at the end of the sponge layer
+#
+#####################################################################
+#output switchs
+forout  .true.  (.true.)  produce formatted output on file [fngrd].out
+grdout  .true.  (.false.) formatted output is in grd format [fngrd]*.#
+iotfor  3600 (999999)  interval between formatted outputs (last one always on), if forout=.true.
+iotunf  999999  (999999)  interval between unfformatted outputs (last one always on), if unfout=.true.
+unfout  .false. (.false.) produce unfformatted output on files [fnout].u[*]
+drgprt  .true.  (.false.) produce drag output on file [fngrd].dxy
+iotdrg  7200     (1)       interval between drag outputs
+iotscrout 10   (1)       interval between screen outputs
+domom  .true.   (.false.)  produce gridded output at z=const on file [fnout].mom
+mxspan .true.   (.false.) !if .true. the domain for the drag computation is centred at x=y=0 (that is at xmount, ymount for the analytical topography) this is needed for drag calculation with analytical mountains.
+iotduv  7200      (20)      interval between momentum flux outputs
+nlev    100     (ns)       number of levels of mom flux and grid output
+dzlev   80.    (500.)     distance between levels of mom flux and grid output
+proout .true.   (.true.)  produce profile output on file [fnout].pro
+iniout .true.  (.true.)  produce formatted output at first time step
+#chose variable group for formatted output:
+norout .true.   (.true.)  " u,v,w,pt,theta,qv,cond,evap,qc,qr (water variables if they are switched on). u,v,w come out in their grid and also in the thermodynamic grid (um,vm,wm) interpolated.
+surout .true.   (.false)  " (all surface variables)
+morout .true.   (.false)  " phi,wsig(vertical vel in sigma coord),rh(relative humidity)
+refout .true.  (.false.)  " us,vs,pts,phis (reference state, maybe interesting in ref state is varying in time in samp_for.ref, and ifuprefs=1)
+difout .false.  (.false)  " Diffusion variables
+driout .true.  (.false)  " Richardson number
+inrout .false.  (.false)  " (debug)
+fluout .false.  (.true)   " (debug)
+ppbout .false.  (.false)  " (debug)
+duvout .false.  (.false)  " (debug)
+uubout .false.  (.false)  " (debug)
+ptbout .false.  (.false)  " (debug)
+ddiout .false.  (.false)  " (debug)
+defout .false.  (.false)  " (debug)
+desout .false.  (.false)  " (debug)
+elfout .false.  (.false)  " (debug)
+elgout .false.  (.false)  " (debug)
+eneout .false.  (.false)  " (debug)
+echeck .false.  (.false)  " (debug)
+masout .false.  (.false.) " (debug)
+# output selection (planes)
+iomod 0  (iomod=0 means that the following selection is on, iomod=1 all sigma planes for debug, =2 all x planes, =3 all y planes)
+ixp 5,-1,-1,-1,-1,-1,-1,-1,-1,-1  select x-planes for formatted output
+iyp -1,-1,-1,-1,-1,-1,-1,-1,-1,-1  select y-planes for formatted output
+isp 51,-1,-1,-1,-1,-1,-1,-1,-1,-1  select sigma-planes for formatted output
+zplan -1,-1,-1.,-1.,-1.,-1.,-1.,-1.,-1.,-1. select z-planes for formatted output
+zconst .true.  (.true.) vertical cross-sections are interpolated for a xz or yz grid
+outpoint 5 5 20   !location of point output goes to file [fngrd]xnnnynnnsnnn.loc, several points may be selected each with one command
+#outprof 32 43       !location of profile output goes to file [fngrd]pfxnnnynnn.loc, several points may be selected each with one command
+outprof 5 5       !location of profile output goes to file [fngrd]pfxnnnynnn.loc, several points may be selected each with one command
+#outprof 18 15       !location of profile output goes to file [fngrd]pfxnnnynnn.loc, several points may be selected each with one command
+#outprof 18 20       !location of profile output goes to file [fngrd]pfxnnnynnn.loc, several points may be selected each with one command
+#outprof 18 30       !location of profile output goes to file [fngrd]pfxnnnynnn.loc, several points may be selected each with one command
+#####################################################################
+#other options (in general not changed)
+itepsuf    .true.  (.true.) ! only relevant with rotation
+filt       0.1     (0.1) time filter (aselin)
+ppfilt     0.1     (0.1) time filter (aselin) for psuf
+nupsur     1       ! interval between updates of ref state at the surface
+nuppts     1       ! interval between updates of ref state; this is not relevant if ifuprefs=1: in this case the update is always made
+nupdif     1       ! interval between updates of diffusion variables
+#####################################################################
+# NEW SWITCHES & PARAMETERS (V. Stepanenko, May 2007)
+#####################################################################
+iflake    0      (0)   ! switch for lake model (0 - ISBA lake, 1 - LAKE model for lake)
+nlakecall 60     (1)   ! the period for updating lake parameters, timesteps (if iflake is set to 1)
+#####################################################################
+# radiation
+# radpar 1 - prescribed fluxes of radiation at the surface, no heating in the atmosphere
+# radpar 2 - parameterized fluxes of radiation at the surface, no heating in the atmosphere
+# radpar 3 - Clirad parameterization (full parameterization of radiation processes in atmosphere)
+# nradcall - number of time steps that separate two subsequent calls of Clirad (if radpar set to 3)
+nradcall  60           ! the period for updating radiation fluxes, timsteps
+radpar    0
+longwave  0            ! relevant if radpar = 3, 1 - longwave parameterization is on, 0 - off
+shortwave 0            ! relevant if radpar = 3, 1 - shortwave parameterization is on, 0 - off
+rat_par   1            ! relevant if radpar = 2
+tau_rg    2.           ! relevant if radpar = 2
+#####################################################################
+# SWITCHES FOR PASSIVE TRACER (D. Mikushin & V. Stepanenko, May 2007)
+#####################################################################
+impur 0
+#####################################################################
+end
