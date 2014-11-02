@@ -5,7 +5,7 @@
 ! diagnostic variable:
      : t,p,qs,
 ! model parameters:
-     : nz,dz,dtl,ifmf,ifwr,
+     : nz,dz,dtl,ifmf,ifwr,hbl,
 ! constants:
      : hlat,hsub,cp,p00,Thom,Tfrz,akapa,
      : condensat,sublim,z
@@ -35,10 +35,14 @@
           else
             cond2=0.
           endif
+!          if (z(iz).gt.hbl) then
+!             cond2=0.
+!             endif
           qv(iz,3)=qv(iz,3)+dtl*(-cond2)
           qc(iz,3)=qc(iz,3) +dtl*cond2
           th(iz,3)=th(iz,3)+dtl*hlat/cp !*(p00/p(iz,2))**akapa
      :    *(cond2)
+ !         write(0,*)z(iz),hlat/cp*cond2
  !         write(0,*) z(iz),p(iz,2)
           condensat(iz)=cond2
         enddo

@@ -26,6 +26,7 @@ obj = \
  $(obj_path)/diffu_TM86.o \
  $(obj_path)/diffu_INM.o \
  $(obj_path)/diffu_Lock.o \
+ $(obj_path)/implicit_dif.o \
  $(obj_path)/progonka.o \
  $(obj_path)/microphysics.o \
  $(obj_path)/microphys_update.o \

@@ -4,10 +4,11 @@
       integer iz
       real,external:: qsat
       real*8 karm,def,lmax,mixl,rich,zero,xn,dudz,dthdz,b
-      real*8 A(1:nz),BB(1:nz),C(1:nz),F(1:nz),dift_hl(1:nz)
-      real*8 difunt2(1:nz)
-      real*8 D1,Dn,kappa1,nu1,kappa2,nu2
+      real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz)
+      real*8 difunt2(1:nz),difunu2(1:nz),difunv2(1:nz),
+     : difunqv2(1:nz),difunqc2(1:nz),difunqr2(1:nz)
       dift_hl=0.
+      difk_hl=0.
       difunt2=0.
       karm=0.4
       zero=1.e-4
@@ -106,32 +107,24 @@
          dift(1)=difk(1)*(min(3.,(1.-16.*rich)**0.25))	
       endif
 
-!      if (implicit) then
-! 1. heat
-! boundary conditions for forward phase
       do iz = 2,nz
          dift_hl(iz)=0.5*(dift(iz-1)+dift(iz))
          difk_hl(iz)=0.5*(difk(iz-1)+difk(iz))
-!         write(0,*) dift_hl(iz)
       enddo
-         D1=dtl*dift_hl(2)/(0.5*(dz(1)+dz(2))*dz(2))
-         kappa1=D1/(D1+1.)
-         nu1=-D1*dz(2)/dift_hl(2)/(D1+1.)*ust_s*tst_s+1./(D1+1.)*th(1,1)
-! boundary conditions for backward phase
-         Dn=dtl*dift_hl(nz)/(dz(nz)**2.)
-         kappa2=Dn/(Dn+1.)
-         nu2=th(nz,1)/(Dn+1.)
-         F(1:nz)=th(1:nz,1)
-! coefficients
-         do iz = 2,nz-1
-            A(iz)=dtl*dift_hl(iz)/(0.5*(dz(iz)+dz(iz+1))*dz(iz))
-            BB(iz)=dtl*dift_hl(iz+1)/(0.5*(dz(iz)+dz(iz+1))*dz(iz+1))
-            C(iz)=A(iz)+BB(iz)+1.
-         enddo
-         call progonka(A,BB,C,F,kappa1,nu1,kappa2,nu2,difunt2)
-! temperature
 
-! etc
+!      if (implicit) then
+      F(1:nz)=th(1:nz,1)         ! right-hand side
+      call implicit_dif(F,th(1:nz,1),dift_hl,ust_s*tst_s,difunt2)
+      F(1:nz)=u(1:nz,1)
+      call implicit_dif(F,u(1:nz,1),difk_hl,cdm*u(1,2),difunu2)
+      F(1:nz)=v(1:nz,1)
+      call implicit_dif(F,v(1:nz,1),difk_hl,cdm*v(1,2),difunv2)
+      F(1:nz)=qv(1:nz,1)
+      call implicit_dif(F,qv(1:nz,1),dift_hl,ust_s*qst_s,difunqv2)
+      F(1:nz)=qc(1:nz,1)
+      call implicit_dif(F,qc(1:nz,1),dift_hl,0.,difunqc2)
+      F(1:nz)=qr(1:nz,1)
+      call implicit_dif(F,qr(1:nz,1),dift_hl,0.,difunqr2)
 !         else
 !         endif
 
@@ -218,9 +211,15 @@
         enddo
       endif
       
-      do iz=1,nz
-      write(0,*) iz,difunt(iz),difunt2(iz)
-      enddo
+!      do iz=1,nz
+!      write(0,*) iz,difunv2(iz),difk_hl(iz)
+!      enddo
+      difunu(1:nz)=difunu2
+      difunt(1:nz)=difunt2
+      difunv(1:nz)=difunv2
+      difunqv(1:nz)=difunqv2
+      difunqc(1:nz)=difunqc2
+      difunqr(1:nz)=difunqr2
       
       difunu(nz)=0.
       difunv(nz)=0.

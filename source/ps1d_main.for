@@ -107,10 +107,10 @@
       !-----------------------------------------!
     !  call baroclinity           ! calculating pressure from hydrostatic + thermal wind
       
-      call radiation  
+
       call moment                ! integration of equations for u and v
       call thermo                ! integration of equation for theta
-      
+      call radiation      
       if (qif.ne.0) then
         call humid                 ! integration of equation for qv
       endif
@@ -194,10 +194,11 @@
        !-----------writing time series------------------------!
       if(mod(nstep*dt,60.).eq.0) write(10,
      : '(f7.2,f11.3,3f9.2,f6.3,f9.2,f9.4,f10.7,2f10.2,
-     :     f9.2,f13.2,f9.3)')
+     :     f9.2,f13.2,f9.3,2f10.6,f10.3)')
      : nstep*dt/60.,distY,u(1,1),v(1,1),
      : sqrt(u(1,1)**2+v(1,1)**2),ust_s,
-     : hbl,-tst_s*ust_s,-qst_s*ust_s,h,le,LWP, th(1,1),qv(1,1)
+     : hbl,-tst_s*ust_s,-qst_s*ust_s,h,le,LWP, th(1,1),qv(1,1),
+     : wth_h,wth_h2,we
      
        if(mod(nstep*dt,60.).eq.0) write(16,
      :  '(f7.2,f11.3,f10.2,5f12.6)')
@@ -228,10 +229,10 @@
            if(iz.eq.0) height=z(0)
            if(iz.gt.0) height=z(iz)-z_sl
            
-              write(20,'(f5.0,4 f10.2,f10.6,3f10.5)')
+              write(20,'(f5.0,4 f10.2,f10.6,3f10.5,f12.6)')
      :        height, u(iz,3),v(iz,3),
      :        sqrt(u(iz,3)**2.+v(iz,3)**2),th(iz,3),qv(iz,3),
-     :        difk(iz),dift(iz),ri(iz) !,sqrt((ug+dpdy(iz)/fcor)**2+vgeos(iz)**2)
+     :        difk(iz),dift(iz),ri(iz),rfl(iz) !,sqrt((ug+dpdy(iz)/fcor)**2+vgeos(iz)**2)
      
               write(22,'(f5.0,8f12.8,3f13.9)')
      :        height,qv(iz,3),qsat(t(iz),p(iz,2)),qsati(t(iz),p(iz,2)),

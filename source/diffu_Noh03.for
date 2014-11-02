@@ -4,13 +4,17 @@
      :                    g,hbl,z_sl,qif,h3,h3c,difunt,difunv,difunu,
      :                    cdm,h3e,def13c,def23c,difunqv,difunqc,difunqr,
      :                    qst_s,wq3,wq3c,wq3r,wq3_c,qc,qr,ifwr,cp,hlat,
-     :                    t,p,dift2,difk2,dR,wq3e,dift3,difk3,ro
+     :                    t,p,dift2,difk2,dR,wq3e,dift3,difk3,ro,dtl,rad
+     :                    ,vat,wth_h,wth_h2,we
       implicit none
       integer iz
       real*8 def, ws0,wstar,eps,thv,fi_m,fi_h,Pr0,gammah
-      real*8 lmax,mixl,xn,rich,dthdz,dudz,wth_h,w_m3,ws,Pr
+      real*8 lmax,mixl,xn,rich,dthdz,dudz,w_m3,ws,Pr
       real*8 delta,w_2,tstar_f,zf,gammah2,wsm,gamma_u,gamma_v
-      real*8 gammaq,wq_h
+      real*8 gammaq,wq_h,eps2,dthv
+      real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz)
+      real*8 difunt2(1:nz),difunu2(1:nz),difunv2(1:nz),
+     : difunqv2(1:nz),difunqc2(1:nz),difunqr2(1:nz)
       real, external :: qsat
       real, parameter:: karm=0.4
       real, parameter:: b_0=6.5
@@ -21,6 +25,9 @@
       real, parameter:: A = 4.5
       real, parameter:: alpha = 3.
       real, parameter:: Sm=15.9
+      h3e=0.
+      dift_hl=0.
+      difk_hl=0.
             
       if(qif.gt.0) then
         thv=th(1,2)+0.61*th(1,2)*qv(1,2)
@@ -32,7 +39,7 @@
       
       eps=z_sl/hbl
 !      write(0,*) eps
-      wstar=(g/thv*Fv*hbl)**(1./3.)
+      wstar=(g/thv*Fv*hbl)**(1./3.) !(g/thv*(-tst_s*ust_s)*hbl)**(1./3.)!(g/thv*Fv*hbl)**(1./3.)
       ws0 = (ust_s**3. + 7.*eps*karm*wstar**3.)**(1./3.)
       wsm=(ust_s**3. + 7.*karm*wstar**3.*0.5)**(1./3.)
       gammah=b_0*Fv/wsm/hbl
@@ -41,15 +48,17 @@
 !     :        *u(1,2)/sqrt(u(1,2)**2.+v(1,2)**2.)
 !      gamma_v=-Sm*ust_s**2./wsm/hbl*(wstar/wsm)**3.
 !     :        *v(1,2)/sqrt(u(1,2)**2.+v(1,2)**2.)
-      w_m3=wstar**3.+B2*ust_s**3.+hbl*dR
-!      write(0,*) w_m3,150.*dR
-      wth_h= 0. !-0.2*w_m3/hbl -0.2*dR
-      wq_h=wth_h/9.*(-7.5e-3)
-      write(0,*) wth_h/10*100
-!      write(0,*)-A*w_m3/hbl,-0.2*dR
+      w_m3=(wstar**3.+B2*ust_s**3.)+hbl*dR*g/thv
+      write(0,*) 'ws',wstar, ust_s
+      wth_h= -6.*w_m3/hbl -0.2*dR !-0.2*(-tst_s*ust_s-0.61*th(1,1)*ust_s*qst_s)
+     :      !-25.*ust_s**3./hbl -0.2*dR !(-0.2*w_m3/hbl-0.2*dR)
+!      wq_h=wth_h/9.*(-7.5e-3)
+!      write(0,*) wth_h/10*100
+      write(0,*)'ent',-6.*w_m3/hbl,-0.2*dR
       
       delta=0.01*hbl
       tstar_f=-ust_s*tst_s/wstar
+
       if (Fv.gt.0) then
         fi_m=(1.-7.*dzits)**(-1./3.)
         fi_h=(1.-16.*dzits)**(-1./2.)
@@ -58,6 +67,31 @@
         fi_h=fi_m
       endif  
       Pr0=fi_h/fi_m+b_0*eps*karm
+      
+      do iz = 2,nz-1
+      if (z(iz).gt.hbl.and.z(iz-1).le.hbl) then
+!         write(0,*) th(iz,2),th(iz-1,2),th(iz+1,2)
+!         write(0,*) qc(iz,2),qc(iz-1,2),qc(iz+1,2)
+!         write(0,*) rad(iz),rad(iz-1),rad(iz+1)
+!         write(0,*) -vat(iz),-vat(iz-1),-vat(iz+1)
+!         write(0,*) difunt2(iz),difunt2(iz-1),difunt2(iz+1)
+!         write(0,*) rad(iz)-vat(iz)+difunt(iz)
+         write(0,*)'dift=', dift(iz),Fv,dR
+         dthv=th(iz,3)+th(iz,3)*(0.61*qv(iz,3)-qc(iz,3)
+     :        )-th(iz-1,3)-th(iz-1,3)*(0.61*qv(iz-1,3)-qc(iz-1,3))
+         we= wth_h/dthv*100.
+          Pr=1.+(Pr0-1.)*exp(-alpha*(z(iz-1)-eps*hbl)**2./hbl**2.)
+         ws=(ust_s**3.+7.*karm*wstar**3.*z(iz-1)/hbl)**(1./3.) 
+         eps2=hbl/z(iz-1)*
+     :   (1.-sqrt(max(0.,-2.*Pr*(wth_h)*dz(iz)/
+     :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))
+         eps2=min(1.,max(0.7,eps2))
+         write(0,*) eps2
+         
+         endif
+      enddo
+
+
 !-------------maximum mixing lenth (for use in Blackadar f-la)------!
        if(ust_s*tst_s.ge.0)then      ! stable stratification
          lmax=40.         
@@ -146,15 +180,15 @@
 	      endif
 	      ws=(ust_s**3.+7.*karm*wstar**3.*z(iz)/hbl)**(1./3.) 
 	      Pr=1+(Pr0-1)*exp(-alpha*(z(iz)-eps*hbl)**2./hbl**2.)
-            difk(iz)= karm*ws*z(iz)*(1.-z(iz)/hbl)**2.
+            difk(iz)= karm*ws*z(iz)*(1.-eps2*z(iz)/hbl)**2.
             dift(iz)= difk(iz)/Pr
-            
 !            dift(iz)=2.*dift(iz) !max(dift(iz),dift2(iz))
 !	    difk(iz)=2.*difk(iz) !max(difk(iz),difk2(iz))
 
-            if(z(iz).le.hbl) then
-           dift3(iz)=0.85*karm*(min(1.,dR*hbl))**(1./3.)*(z(iz)-0)**2.
-     :              /(hbl-0)*(1.-(z(iz)-0)/(hbl-0))**0.5
+            if(z(iz+1).le.hbl) then
+           dift3(iz)=0.85*karm*(min(1.,dR*hbl))**(1./3.)*
+     :               (z(iz)-0.)**2.
+     :              /(hbl-0.)*(1.-(z(iz)-0.)/(hbl-0.))**0.5
            difk3(iz)=0.75*dift3(iz)
          !  write(0,*) dift3(iz),dift(iz),(dR*hbl)**(1./3.)
            endif
@@ -162,7 +196,7 @@
            dift(iz)=max(dift(iz),dift3(iz))
 	    difk(iz)=max(difk(iz),difk3(iz))
 
-            
+            !write(0,*) z(iz),dift(iz)            
           endif
         endif
       enddo
@@ -185,7 +219,65 @@
 	else
 	  difk(1)=karm*ws0*z_sl*(1.-z_sl/hbl)**2.
         dift(1)=difk(1)/Pr0
-	endif
+      endif
+	
+      do iz = 2,nz
+         dift_hl(iz)=0.5*(dift(iz-1)+dift(iz))
+         difk_hl(iz)=0.5*(difk(iz-1)+difk(iz))
+         if (z(iz-1).lt.hbl.and.z(iz).gt.hbl) then 
+!          dift_hl(iz)=dift(iz)
+!          dift_hl(iz-1)=dift(iz-2)
+!         h3e(iz)=-wth_h
+!         h3e(iz-1)=-wth_h/5.
+         endif
+      enddo
+
+       do iz=2,nz-1
+         h3(iz)=(th(iz,2)-th(iz-1,2))/dz(iz)
+         h3(iz)=h3(iz)*0.5*(dift(iz)+dift(iz-1))
+         if(z(iz).le.hbl) then
+ !        zf=z(iz)
+!	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
+!     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
+!	     w_2=w_2**(2./3.)
+!	     gammah2=b_hm*wstar**2*tstar_f/w_2/hbl
+	     h3c(iz)=-gammah*dift_hl(iz)
+!	     h3e(iz+1)=-wth_h*min(1.,(z(iz)/hbl)**7.)
+!             write(0,*)z(iz), h3(iz),h3e(iz)
+	   else
+           h3c(iz)=0.
+           h3e(iz+1)=0.
+	   endif     
+       enddo
+
+      !      if (implicit) then
+      do iz=1,nz-1
+      F(iz)=th(iz,1) +dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammah*(dift_hl(iz)-dift_hl(iz+1)))         ! right-hand side
+      enddo
+      F(nz)=th(nz,1)+dtl/dz(nz)*gammah*dift_hl(nz)
+      call implicit_dif(F,th(1:nz,1),dift_hl,ust_s*tst_s,difunt2)
+      F(1:nz)=u(1:nz,1)
+      call implicit_dif(F,u(1:nz,1),difk_hl,cdm*u(1,2),difunu2)
+      F(1:nz)=v(1:nz,1)
+      call implicit_dif(F,v(1:nz,1),difk_hl,cdm*v(1,2),difunv2)
+      do iz=1,nz-1
+      F(iz)=qv(iz,1) +dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammaq*(dift_hl(iz)-dift_hl(iz+1)))         ! right-hand side
+      enddo
+      F(nz)=qv(nz,1)+dtl/dz(nz)*gammaq*dift_hl(nz)
+      call implicit_dif(F,qv(1:nz,1),dift_hl,ust_s*qst_s,difunqv2)
+      F(1:nz)=qc(1:nz,1)
+      call implicit_dif(F,qc(1:nz,1),dift_hl,0.,difunqc2)
+      F(1:nz)=qr(1:nz,1)
+      call implicit_dif(F,qr(1:nz,1),dift_hl,0.,difunqr2)
+!         else
+!         endif
+
+!       do iz=1,nz-1
+!      difunt2(iz)=difunt2(iz)+1./(0.5*dz(iz)+dz(iz+1))*
+!     :        (gammah*(dift_hl(iz)-dift_hl(iz+1))-h3e(iz)+h3e(iz+1))         ! right-hand side
+!      enddo
 	
 	do iz=2,nz
         def13(iz)=def13(iz)*0.5*(difk(iz)+difk(iz-1))
@@ -214,24 +306,28 @@
        do iz=2,nz-1
          h3(iz)=(th(iz,2)-th(iz-1,2))/dz(iz)
          h3(iz)=h3(iz)*0.5*(dift(iz)+dift(iz-1))
-         if(z(iz).le.hbl.and.-tst_s.gt.0) then
+         if(z(iz-1).le.hbl.and.-tst_s.gt.0) then
          zf=z(iz)
 	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
      :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
 	     w_2=w_2**(2./3.)
 	     gammah2=b_hm*wstar**2*tstar_f/w_2/hbl
 	     h3c(iz)=-gammah*0.5*(dift(iz)+dift(iz-1))
-	     h3e(iz)=-wth_h*min(1.,0.5*(z(iz)+z(iz))/hbl)**3.
+!	     h3e(iz+1)=-wth_h*min(1.,0.5*(z(iz)+z(iz))/hbl)**3.
 !             write(0,*)z(iz), h3(iz),h3e(iz)
+             
 	   else
            h3c(iz)=0.
-	   endif     
+	   endif
+                if (z(iz).gt.hbl.and.z(iz-1).le.hbl) then
+                   wth_h2=difunt2(iz)*dz(iz)!h3(iz)+h3c(iz)
+                   endif
        enddo
 
         do iz=2,nz-1
          wq3(iz)=(qv(iz,2)-qv(iz-1,2))/dz(iz)
          wq3(iz)=wq3(iz)*0.5*(dift(iz)+dift(iz-1))
-         if(z(iz).le.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
+!         if(z(iz).le.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
 !           zf=z(iz-1)
 !	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
 !     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
@@ -239,9 +335,9 @@
 !	     gammaq=b_hm*wstar*(-ust_s*qst_s)/w_2/hbl
 	     wq3_c(iz)=-gammaq*0.5*(dift(iz)+dift(iz-1))
 !             wq3e(iz)=-wq_h*min(1.,0.5*(z(iz)+z(iz-1))/hbl)**3.
-	   else
-           wq3_c(iz)=0.
-	   endif     
+!	   else
+!           wq3_c(iz)=0.
+!	   endif     
        enddo
       
       h3(1)=ust_s*tst_s
@@ -262,6 +358,7 @@
         difunt(iz)=(h3(iz+1)+h3c(iz+1)+h3e(iz+1)
      :             -h3(iz)-h3c(iz)-h3e(iz))
      :             /(0.5*(dz(iz+1)+dz(iz)))
+!        write(0,*)z(iz),difunt(iz),difunt2(iz)
          difunqv(iz)=(wq3(iz+1)+wq3_c(iz+1)+wq3e(iz+1)
      :             -wq3(iz)-wq3_c(iz)-wq3e(iz))
      :             /(0.5*(dz(iz+1)+dz(iz)))
@@ -275,6 +372,14 @@
         enddo
       endif
       
+      difunu(1:nz)=difunu2
+      difunt(1:nz)=difunt2
+      difunv(1:nz)=difunv2
+      difunqv(1:nz)=difunqv2
+      difunqc(1:nz)=difunqc2
+      difunqr(1:nz)=difunqr2
+
+
       difunu(nz)=0.
       difunv(nz)=0.
       difunt(nz)=0.

@@ -35,6 +35,7 @@
      : difunu,difunv,difunt,def13,def23,difk,dift,z,
      : difk2,dift2,difunqv,difunqc,difunqr,difunqci,difunqsn,
      : def13c,def23c,dift3,difk3
+      real(kind(0.d0)) wth_h,wth_h2,we
 !-------------MICROPHYSICS VARS AND CONSTANTS------------!   
       real(kind(0.d0)):: prec
       real(kind(0.d0)),allocatable,dimension(:)::

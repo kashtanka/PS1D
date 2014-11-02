@@ -60,7 +60,7 @@
   !      write(0,*) qst_s,qstar
         cdm=ust_s**2/uvs
         dzits=z_sl/(ust_s**2*th(1,2))*(g*0.4*tst_s)
-        write(0,*) dzita
+!        write(0,*) dzita
 !---------------------------------------------------!
       Fv=-ust_s*tst_s-0.61*t(1)*ust_s*qst_s
     !  write(0,*)dt*nstep,qsat(252.,p(1,2)),qv(1,2)

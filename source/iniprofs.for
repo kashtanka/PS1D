@@ -51,12 +51,12 @@
       !! initialization for marine Sc case   !!
       !!-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-!!
       do iz = 0,nz
-         if (z(iz)-z_sl.lt.840) then
+         if (z(iz)-z_sl.le.835) then
             qv(iz,2)=9.e-3
             th(iz,2)=289.
          else
             qv(iz,2)=1.5e-3
-            th(iz,2)=297.5+(z(iz)-z_sl-840.)**(1./3.)
+            th(iz,2)=297.5+(z(iz)-z_sl-835.)**(1./3.)
          endif
          qv(:,1)=qv(:,2)
          qv(:,3)=qv(:,2)

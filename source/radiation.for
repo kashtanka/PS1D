@@ -20,7 +20,7 @@
       do iz=1,nz-1
          if(qv(iz,2)+qc(iz,2).ge.8.e-3.and.
      :      qv(iz+1,2)+qc(iz+1,2).lt.8.e-3) then
-            zi=z(iz)
+            zi=0.5*(z(iz)+z(iz+1))
             endif
             zi=max(100.,zi)
       enddo
@@ -44,12 +44,13 @@
       mdR=0.
       do iz=1,nz-1
          rad(iz)=-(rfl(iz)-rfl(iz-1))/(0.5*(dz(iz+1)+dz(iz)))/cp/ro(iz)
+!         write(0,*) rad(iz),qc(iz,2)
 !         dR=(rfl(iz)-rfl(iz-1))/cp/ro(iz)
 !         if (dR.gt.mdR) mdR=dR
 !         write(0,*) z(iz),rad(iz),qc(iz,2)
          if (z(iz).lt.hbl.and.z(iz+1).ge.hbl) then
             dR=(rfl(iz)-rfl(iz-3))/cp/ro(iz)
-!            write(0,*) dR,(rfl(iz)-rfl(iz-3))/cp/ro(iz)
+ !           write(0,*) dR,(rfl(iz)-rfl(iz-3))/cp/ro(iz)
          endif
       enddo
 !      write(0,*) dR2,mdR

@@ -2,14 +2,16 @@
       use alloc_1d
       implicit none
       logical nonloc_tm86,difloc,nonloc_lock
-      real*8 dthdz2,dthdz1,hbl1,hbl2,hbl3,th_h,th_m
-      real*8 ws_m,wstar,thv,wth_h,w_m3,thl_ct
+      real*8 dthdz2,dthdz1,hbl1,hbl2,hbl3,th_h,th_m,hbl0,maxdt
+      real*8 ws_m,wstar,thv,w_m3,thl_ct,hbl4
       integer iz,mz,i,nlct
       real, parameter:: b_0 = 6.5
       real, parameter:: b_t = 46.
       real,parameter:: B=5.
       real, parameter:: A=4.5
       real, parameter:: karm = 0.4
+      real*8 dthdz(1:nz)
+      dthdz=0.
       
       nlct=0
       if(qif.gt.0) then
@@ -17,22 +19,29 @@
       else
         thv=th(1,2)
       endif
-      
+     
 
+      do iz=2,nz
+         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+0.4) then
+            hbl4=z(iz)-5.
+            !write(0,*) z(iz),th(iz,2),th(1,2)
+            goto 20
+         endif
+      enddo
       
-       
-      do iz=3,nz-1
-      dthdz1= ((th(iz-1,2)-hlat/cp*qc(iz-1,2))-
-     :  (th(iz-2,2)-hlat/cp*qc(iz-2,2)))/(z(iz-1)-z(iz-2))
-      dthdz2= ((th(iz,2)-hlat/cp*qc(iz,2))
-     :  -(th(iz-1,2)-hlat/cp*qc(iz-1,2)))/(z(iz)-z(iz-1))
+ 20   do iz =3,nz-1
+         dthdz2= ((th(iz+1,2)-hlat/cp*qc(iz+1,2))
+     :  -(th(iz,2)-hlat/cp*qc(iz,2)))/(z(iz+1)-z(iz))
       if(dthdz2.gt.0.003) then
-      hbl1 = max(50.,z(iz)-(dthdz2-0.003)/
-     :	(dthdz2-dthdz1)
-     :    *(z(iz)-z(iz-1)))
+!         write(0,*) 'dth',th(iz+1,1)-th(iz,1)
+!     :   ,(th(iz+1,2)-hlat/cp*qc(iz+1,2))
+!     :    -(th(iz,2)-hlat/cp*qc(iz,2))
+      hbl1 = max(50.,z(iz+1)-(dthdz2-0.003)/
+     :	(dthdz2)
+     :    *(z(iz+1)-z(iz)))
       mz=int(iz/2.)
       
-    !  hbl1=z(iz)           !easy option, but not smooth
+      hbl1=z(iz)+0.1           !easy option, but not smooth
       goto 30
       endif
       enddo
@@ -101,6 +110,6 @@
       
       
      
-50    hbl=hbl3
-      write(0,*) 'hbl=',hbl1,hbl2,hbl3
+50    hbl=hbl4   !max(hbl3,hbl1)
+      write(0,*) 'hbl=',hbl1,hbl4
       end

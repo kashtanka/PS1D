@@ -3,9 +3,19 @@
       implicit none
       integer iz
       real*8 karm,def,lmax,mixl,rich,zero,xn,dudz,dthdz,b,thv,
-     :wstar,wm,w_2s,w_2,tstar_f,gammah,gammah_s,zf,gammaq
+     :wstar,wm,w_2s,w_2,tstar_f,gammah_s,zf
       real,parameter:: b_hm=3.
       real, external:: qsat
+      real*8 gammaq(1:nz),gammah(1:nz),gammaq_hl(1:nz),gammah_hl(1:nz)
+      real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz)
+      real*8 difunt2(1:nz),difunu2(1:nz),difunv2(1:nz),
+     : difunqv2(1:nz),difunqc2(1:nz),difunqr2(1:nz)
+      dift_hl=0.
+      difk_hl=0.
+      gammah_hl=0.
+      gammaq_hl=0.
+      gammah=0.
+      gammaq=0.
       karm=0.4
       zero=1.e-8
       !b=0.005
@@ -174,6 +184,53 @@
      :        ust_s*karm*z_sl/hbl
      :        /((1-16.*dzits)**(-0.25))/w_2s)
 	endif
+
+      do iz=2,nz
+         if(z(iz).lt.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
+           zf=z(iz)
+	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
+     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
+	     w_2=w_2**(2./3.)
+	     gammah(iz)=b_hm*wstar**2*tstar_f/w_2/hbl
+             gammaq(iz)=b_hm*wstar*(-ust_s*qst_s)/w_2/hbl
+          else
+             gammah(iz)=0.
+             gammaq(iz)=0.
+          endif
+       enddo
+
+      do iz = 2,nz
+         dift_hl(iz)=0.5*(dift(iz-1)+dift(iz))
+         difk_hl(iz)=0.5*(difk(iz-1)+difk(iz))
+         gammah_hl(iz)=0.5*(gammah(iz-1)+gammah(iz))
+         gammaq_hl(iz)=0.5*(gammaq(iz-1)+gammaq(iz))
+      enddo
+
+!      if (implicit) then
+      do iz=1,nz-1
+      F(iz)=th(iz,1)+dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammah_hl(iz)*dift_hl(iz)
+     :         -gammah_hl(iz+1)*dift_hl(iz+1))         ! right-hand side
+      enddo
+      F(nz)=th(nz,1)+dtl/dz(nz)*gammah_hl(nz)*dift_hl(nz)
+      call implicit_dif(F,th(1:nz,1),dift_hl,ust_s*tst_s,difunt2)
+      F(1:nz)=u(1:nz,1)
+      call implicit_dif(F,u(1:nz,1),difk_hl,cdm*u(1,2),difunu2)
+      F(1:nz)=v(1:nz,1)
+      call implicit_dif(F,v(1:nz,1),difk_hl,cdm*v(1,2),difunv2)
+      do iz=1,nz-1
+      F(iz)=qv(iz,1)+dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammaq_hl(iz)*dift_hl(iz)
+     :         -gammaq_hl(iz+1)*dift_hl(iz+1))         ! right-hand side
+      enddo
+      F(nz)=qv(nz,1)+dtl/dz(nz)*gammaq_hl(nz)*dift_hl(nz)
+      call implicit_dif(F,qv(1:nz,1),dift_hl,ust_s*qst_s,difunqv2)
+      F(1:nz)=qc(1:nz,1)
+      call implicit_dif(F,qc(1:nz,1),dift_hl,0.,difunqc2)
+      F(1:nz)=qr(1:nz,1)
+      call implicit_dif(F,qr(1:nz,1),dift_hl,0.,difunqr2)
+!         else
+!         endif
 	
 	
 	do iz=2,nz
@@ -194,16 +251,16 @@
        do iz=2,nz-1
          h3(iz)=(th(iz,2)-th(iz-1,2))/dz(iz)
          h3(iz)=h3(iz)*0.5*(dift(iz)+dift(iz-1))
-         if(z(iz).le.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
-           zf=z(iz)
-	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
-     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
-	     w_2=w_2**(2./3.)
-	     gammah=b_hm*wstar**2*tstar_f/w_2/hbl
-	     h3c(iz)=-gammah*0.5*(dift(iz)+dift(iz-1))
-	   else
-           h3c(iz)=0.
-	   endif     
+!         if(z(iz).le.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
+!           zf=z(iz)
+!	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
+!     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
+!	     w_2=w_2**(2./3.)
+!	     gammah=b_hm*wstar**2*tstar_f/w_2/hbl
+	     h3c(iz)=-gammah_hl(iz)*0.5*(dift(iz)+dift(iz-1))
+!	   else
+!           h3c(iz)=0.
+!	   endif     
        enddo
       
       h3(1)=ust_s*tst_s
@@ -212,16 +269,16 @@
        do iz=2,nz-1
          wq3(iz)=(qv(iz,2)-qv(iz-1,2))/dz(iz)
          wq3(iz)=wq3(iz)*0.5*(dift(iz)+dift(iz-1))
-         if(z(iz).le.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
-           zf=z(iz)
-	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
-     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
-	     w_2=w_2**(2./3.)
-	     gammaq=b_hm*wstar*(-ust_s*qst_s)/w_2/hbl
-	     wq3_c(iz)=-gammaq*0.5*(dift(iz)+dift(iz-1))
-	   else
-           wq3_c(iz)=0.
-	   endif     
+!         if(z(iz).le.hbl.and.-(tst_s+0.61*thv*qst_s).gt.0) then
+!           zf=z(iz)
+!	     w_2=(1.6*ust_s**2.*(1.-zf/hbl))**(3./2.)+
+!     :         1.2*wstar**3.*zf/hbl*(1.-0.9*zf/hbl)**(3./2.)
+!	     w_2=w_2**(2./3.)
+!	     gammaq=b_hm*wstar*(-ust_s*qst_s)/w_2/hbl
+	     wq3_c(iz)=-gammaq_hl(iz)*0.5*(dift(iz)+dift(iz-1))
+!	   else
+!           wq3_c(iz)=0.
+!	   endif     
        enddo
       
       wq3(1)=ust_s*qst_s
@@ -250,6 +307,17 @@
           difunqr(iz)=(wq3r(iz+1)-wq3r(iz))/(0.5*(dz(iz+1)+dz(iz)))
         enddo
       endif
+      
+!      do iz=1,nz
+!      write(0,*) iz,difunt2(iz),difunt(iz)
+!      enddo
+
+      difunu(1:nz)=difunu2
+      difunt(1:nz)=difunt2
+      difunv(1:nz)=difunv2
+      difunqv(1:nz)=difunqv2
+      difunqc(1:nz)=difunqc2
+      difunqr(1:nz)=difunqr2
       
       difunu(nz)=0.
       difunv(nz)=0.

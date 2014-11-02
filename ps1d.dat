@@ -2,9 +2,9 @@ nh1d
 #####
 nz 180
 ztop 1800
-ntime 1800000
-dt 0.0125
-iodif 3    # 3-local; 4-TroenMahrt86; 5-LupkesSchlunzen96; 6-Nohetal03 
+ntime 4320
+dt 5
+iodif 6    # 3-local; 4-TroenMahrt86; 5-LupkesSchlunzen96; 6-Nohetal03 
 ifhle 0
 tfix 1
 qif 1
