@@ -6,24 +6,36 @@
       real*8,parameter :: DIV = 3.75e-6
       real*8,parameter :: F0 = 70.
       real*8,parameter :: F1 = 22.
-      real*8 zi,Q1,Q0,Q2,R3,mdR,dR2
+      real*8,parameter:: gq = 1.7e-6
+      real*8 zi,Q1,Q0,Q2,R3,mdR,dR2,LWP,LWP2,qmax,dRmax
+      real*8 Fplus
 !-----------------------------------------!
 !-!    net longwave radiative flux for  !-!
 !-!    Sc experiment at half-levels     !-!
 !-----------------------------------------!
       Q0=0.
       Q2=0.
+      LWP=0.
+      qmax=0.
       do iz=1,nz-1
       Q0=Q0+xkp*ro(iz)*qc(iz,2)*0.5*(dz(iz)+dz(iz+1))
       enddo
 
       do iz=1,nz-1
+!--------determine qmax for LWP calc--------------!
+        if (z(iz).le.hbl) then
+           LWP = LWP+ro(iz)*qc(iz,2)*1000.*dz(iz)
+           if (qc(iz,2).gt.qmax) qmax = qc(iz,2)
+        endif       
          if(qv(iz,2)+qc(iz,2).ge.8.e-3.and.
      :      qv(iz+1,2)+qc(iz+1,2).lt.8.e-3) then
             zi=0.5*(z(iz)+z(iz+1))
             endif
             zi=max(100.,zi)
       enddo
+      LWP2=ro(1)*qmax**2./(2.*gq)*1000.
+      write(0,*) 'LWP1 =', LWP
+      write(0,*) 'LWP2 =', LWP2
 !      zi=800.
       Q1=Q0
       rfl(0)=F0*exp(-Q1)+F1
@@ -49,10 +61,23 @@
 !         if (dR.gt.mdR) mdR=dR
 !         write(0,*) z(iz),rad(iz),qc(iz,2)
          if (z(iz).lt.hbl.and.z(iz+1).ge.hbl) then
-            dR=(rfl(iz)-rfl(iz-3))/cp/ro(iz)
+            dR=(rfl(iz)-rfl(iz-1))/cp/ro(iz)
+            Fplus = rfl(iz)
  !           write(0,*) dR,(rfl(iz)-rfl(iz-3))/cp/ro(iz)
          endif
       enddo
+      dRmax = 0.
+      do iz =1, nz-1
+         if(qc(iz,2).gt.0) then
+            if ((Fplus - rfl(iz))/cp/ro(iz).gt.dRmax) 
+     :          dRmax = (Fplus - rfl(iz))/cp/ro(iz)
+         endif
+      enddo
+       dR2 = Fplus*(1. - exp(-0.03*sqrt(LWP)))
+       write(0,*) 'dR2 = ',dR2/cp/ro(1)
+       write(0,*) 'dR = ', dR
+       write(0,*) 'dRmax =', dRmax
+       dR=dRmax
 !      write(0,*) dR2,mdR
 !      rad=0.
       

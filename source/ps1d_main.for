@@ -19,7 +19,7 @@
 !  read parameters      
       call readpa(fnmap,fnfor,fnout,itheta
      :   ,iwind,scrout,fngrd,difloc,nonloc_tm86,nonloc_ls96,
-     :    nonloc_noh03)
+     :    nonloc_noh03,loc_inm,nonloc_lock)
      
 !  open files for output     
       open(10,file='./results/exp/timeserie_GABLS.txt')
@@ -84,6 +84,8 @@
       !----------turbulent diffusion------------!      
       if (difloc) then 
 	    call diffu_local
+        elseif (inm) then
+           call diffu_INM
 	elseif (nonloc_tm86) then
 	    call diffu_TM86
 	elseif (nonloc_ls96) then

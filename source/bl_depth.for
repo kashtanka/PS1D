@@ -22,7 +22,7 @@
      
 
       do iz=2,nz
-         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+0.4) then
+         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+0.5) then
             hbl4=z(iz)-5.
             !write(0,*) z(iz),th(iz,2),th(1,2)
             goto 20

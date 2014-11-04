@@ -50,7 +50,7 @@
 !     :        *v(1,2)/sqrt(u(1,2)**2.+v(1,2)**2.)
       w_m3=(wstar**3.+B2*ust_s**3.)+hbl*dR*g/thv
       write(0,*) 'ws',wstar, ust_s
-      wth_h= -6.*w_m3/hbl -0.2*dR !-0.2*(-tst_s*ust_s-0.61*th(1,1)*ust_s*qst_s)
+      wth_h= -6.*w_m3/hbl !-0.5*dR !-0.2*(-tst_s*ust_s-0.61*th(1,1)*ust_s*qst_s)
      :      !-25.*ust_s**3./hbl -0.2*dR !(-0.2*w_m3/hbl-0.2*dR)
 !      wq_h=wth_h/9.*(-7.5e-3)
 !      write(0,*) wth_h/10*100
@@ -77,16 +77,17 @@
 !         write(0,*) difunt2(iz),difunt2(iz-1),difunt2(iz+1)
 !         write(0,*) rad(iz)-vat(iz)+difunt(iz)
          write(0,*)'dift=', dift(iz),Fv,dR
-         dthv=th(iz,3)+th(iz,3)*(0.61*qv(iz,3)-qc(iz,3)
-     :        )-th(iz-1,3)-th(iz-1,3)*(0.61*qv(iz-1,3)-qc(iz-1,3))
+         dthv=th(iz,2)+th(iz,2)*(0.61*qv(iz,2)-qc(iz,2)
+     :        )-th(iz-1,2)-th(iz-1,2)*(0.61*qv(iz-1,2)-qc(iz-1,2))
          we= wth_h/dthv*100.
           Pr=1.+(Pr0-1.)*exp(-alpha*(z(iz-1)-eps*hbl)**2./hbl**2.)
          ws=(ust_s**3.+7.*karm*wstar**3.*z(iz-1)/hbl)**(1./3.) 
          eps2=hbl/z(iz-1)*
      :   (1.-sqrt(max(0.,-2.*Pr*(wth_h)*dz(iz)/
-     :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))
+     :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))         !
+          write(0,*) 'eps = ',eps2, dthv
          eps2=min(1.,max(0.7,eps2))
-         write(0,*) eps2
+        
          
          endif
       enddo

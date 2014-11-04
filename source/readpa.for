@@ -5,7 +5,7 @@
       implicit none
       logical scrout,dif3d,diftx
 	logical difloc,nonloc_tm86,nonloc_ls96,nonloc_noh03,
-     :          loc_inm,nonloc_lock  
+     :          loc_inm,nonloc_lock
       character*80 fnmap,fnfor,fext,fnout,fngrd
       character*80 line
       character*20 keyword,uppercase
