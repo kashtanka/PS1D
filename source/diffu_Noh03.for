@@ -5,7 +5,8 @@
      :                    cdm,h3e,def13c,def23c,difunqv,difunqc,difunqr,
      :                    qst_s,wq3,wq3c,wq3r,wq3_c,qc,qr,ifwr,cp,hlat,
      :                    t,p,dift2,difk2,dR,wq3e,dift3,difk3,ro,dtl,rad
-     :                    ,vat,wth_h,wth_h2,we
+     :                    ,vat,wth_h,wth_h2,we,condensat,hlat,akapa,p00,
+     :                    the,tende
       implicit none
       integer iz
       real*8 def, ws0,wstar,eps,thv,fi_m,fi_h,Pr0,gammah
@@ -13,14 +14,15 @@
       real*8 delta,w_2,tstar_f,zf,gammah2,wsm,gamma_u,gamma_v
       real*8 gammaq,wq_h,eps2,dthv
       real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz)
+      real*8 dift_hl2(1:nz),difk_hl2(1:nz),dift_hl3(1:nz)
       real*8 difunt2(1:nz),difunu2(1:nz),difunv2(1:nz),
      : difunqv2(1:nz),difunqc2(1:nz),difunqr2(1:nz)
       real, external :: qsat
       real, parameter:: karm=0.4
       real, parameter:: b_0=6.5
       real, parameter:: b_hm=3.
-      real, parameter:: b = 0.
-      real, parameter:: zero = 1.e-8
+      real*8, parameter:: b = 0.
+      real, parameter:: zero = 1.e-4
       real, parameter:: B2 = 5.
       real, parameter:: A = 4.5
       real, parameter:: alpha = 3.
@@ -28,37 +30,40 @@
       h3e=0.
       dift_hl=0.
       difk_hl=0.
-            
+      dift_hl2=0.
+      difk_hl2=0.
+      dift_hl3=0.
+      difunt2=0.
+      difk=0.
+      dift=0.
+      difk2=0.
+      dift2=0.
+      dift3=0.
+      difk3=0.
+!--------virtual potential temperature---------------------            
       if(qif.gt.0) then
         thv=th(1,2)+0.61*th(1,2)*qv(1,2)
       else
         thv=th(1,2)
       endif
-      
-      
-      
+!----surface layer fraction      
       eps=z_sl/hbl
-!      write(0,*) eps
-      wstar=(g/thv*Fv*hbl)**(1./3.) !(g/thv*(-tst_s*ust_s)*hbl)**(1./3.)!(g/thv*Fv*hbl)**(1./3.)
+!--------scaling parameters----------------------------------
+      wstar=(g/thv*Fv*hbl)**(1./3.) 
       ws0 = (ust_s**3. + 7.*eps*karm*wstar**3.)**(1./3.)
       wsm=(ust_s**3. + 7.*karm*wstar**3.*0.5)**(1./3.)
+      tstar_f=-ust_s*tst_s/wstar
       gammah=b_0*Fv/wsm/hbl
       gammaq=-b_0*qst_s*ust_s/wsm/hbl
+!--------for the nonlocal transport of momentum--------------
 !      gamma_u=-Sm*ust_s**2./wsm/hbl*(wstar/wsm)**3.
 !     :        *u(1,2)/sqrt(u(1,2)**2.+v(1,2)**2.)
 !      gamma_v=-Sm*ust_s**2./wsm/hbl*(wstar/wsm)**3.
 !     :        *v(1,2)/sqrt(u(1,2)**2.+v(1,2)**2.)
-      w_m3=(wstar**3.+B2*ust_s**3.)+hbl*dR*g/thv
-      write(0,*) 'ws',wstar, ust_s
-      wth_h= -6.*w_m3/hbl !-0.5*dR !-0.2*(-tst_s*ust_s-0.61*th(1,1)*ust_s*qst_s)
-     :      !-25.*ust_s**3./hbl -0.2*dR !(-0.2*w_m3/hbl-0.2*dR)
-!      wq_h=wth_h/9.*(-7.5e-3)
-!      write(0,*) wth_h/10*100
-      write(0,*)'ent',-6.*w_m3/hbl,-0.2*dR
-      
-      delta=0.01*hbl
-      tstar_f=-ust_s*tst_s/wstar
-
+!-------entrainment------------------------------------------
+      w_m3=(wstar**3.+B2*ust_s**3.) +hbl*dR*g/thv
+      wth_h= -6.*w_m3/hbl    
+!---------surface Prandtl number-----------------!
       if (Fv.gt.0) then
         fi_m=(1.-7.*dzits)**(-1./3.)
         fi_h=(1.-16.*dzits)**(-1./2.)
@@ -67,16 +72,10 @@
         fi_h=fi_m
       endif  
       Pr0=fi_h/fi_m+b_0*eps*karm
-      
+!------------------------------------------------!
+!---------------matching K-profile with the entrainment flux------!
       do iz = 2,nz-1
       if (z(iz).gt.hbl.and.z(iz-1).le.hbl) then
-!         write(0,*) th(iz,2),th(iz-1,2),th(iz+1,2)
-!         write(0,*) qc(iz,2),qc(iz-1,2),qc(iz+1,2)
-!         write(0,*) rad(iz),rad(iz-1),rad(iz+1)
-!         write(0,*) -vat(iz),-vat(iz-1),-vat(iz+1)
-!         write(0,*) difunt2(iz),difunt2(iz-1),difunt2(iz+1)
-!         write(0,*) rad(iz)-vat(iz)+difunt(iz)
-         write(0,*)'dift=', dift(iz),Fv,dR
          dthv=th(iz,2)+th(iz,2)*(0.61*qv(iz,2)-qc(iz,2)
      :        )-th(iz-1,2)-th(iz-1,2)*(0.61*qv(iz-1,2)-qc(iz-1,2))
          we= wth_h/dthv*100.
@@ -84,20 +83,15 @@
          ws=(ust_s**3.+7.*karm*wstar**3.*z(iz-1)/hbl)**(1./3.) 
          eps2=hbl/z(iz-1)*
      :   (1.-sqrt(max(0.,-2.*Pr*(wth_h)*dz(iz)/
-     :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))         !
-          write(0,*) 'eps = ',eps2, dthv
-         eps2=min(1.,max(0.7,eps2))
-        
-         
+     :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))       
+         eps2=min(1.,max(0.7,eps2))         
          endif
       enddo
-
-
-!-------------maximum mixing lenth (for use in Blackadar f-la)------!
-       if(ust_s*tst_s.ge.0)then      ! stable stratification
+!-------------maximum mixing length (for use in Blackadar f-la)------!
+       if(Fv.lt.0)then      ! stable stratification
          lmax=40.         
        else                          !  unstable stratification
-         lmax=0.15*hbl
+         lmax=300. !0.15*hbl
        endif
 !-------------------------------------------------------------------!
 !---------for use in local closure / or Prandtl number--------------!
@@ -107,9 +101,11 @@
       enddo
 !------------start of the loop for coefficients---------------------!       
       do iz=2,nz-1
-        def=dsqrt(((u(iz+1,2)-u(iz-1,2))/(z(iz+1)-z(iz-1)))**2.+
-     :         ((v(iz+1,2)-v(iz-1,2))/(z(iz+1)-z(iz-1)))**2.)        
+         def=max(zero,dsqrt(((u(iz+1,2)-u(iz-1,2))
+     :           /(z(iz+1)-z(iz-1)))**2.+
+     :         ((v(iz+1,2)-v(iz-1,2))/(z(iz+1)-z(iz-1)))**2.))       
         mixl=karm*z(iz)/(1.+karm*z(iz)/lmax)
+
        if(qif.ne.0) then 
            if(ifwr.eq.0.) then              ! virtual theta
            xn=g*(th(iz+1,2)*(1.+0.61*qv(iz,2))
@@ -123,8 +119,8 @@
      :        -(th(iz-1,2)-hlat/cp*qc(iz-1,2)))
      :        /(z(iz+1)-z(iz-1))/th(iz,2)
              else
-            xn=g*(th(iz+1,2)*(1.+0.61*qv(iz,2))
-     :      -th(iz-1,2)*(1.+0.61*qv(iz,2)))
+            xn=g*(th(iz+1,2)*(1.+0.61*qv(iz+1,2))
+     :      -th(iz-1,2)*(1.+0.61*qv(iz-1,2)))
      :      /(z(iz+1)-z(iz-1))/
      :     th(iz,2)/(1.+0.61*qv(iz,2))
              endif
@@ -133,73 +129,36 @@
            xn=g*(th(iz+1,2)-th(iz-1,2))/(z(iz+1)-z(iz-1))/th(iz,2)
          endif
 
-!        xn=g*(th(iz+1,2)-th(iz-1,2))/(z(iz+1)-z(iz-1))/th(iz,2)
         rich=xn/(def*def+zero)
-      
-          if (Fv.le.0) then 
-	      if(rich.ge.0) then
-	        if(rich.le.0.2) then
-                difk(iz)=mixl**2*def*(max(b,(1.-5.*rich))**2)
-	          dift(iz)=difk(iz)
-	        else
-	          difk(iz)=mixl**2*def*b
-	          dift(iz)=difk(iz)
-	        endif  
-	      else
-	        difk(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
-	        dift(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
-	      endif
-	    else
-	    
-	    if(z(iz).gt.hbl) then
-	
-	      if(rich.ge.0) then
-	        if(rich.le.0.2) then
-                difk(iz)=mixl**2*def*(max(b,(1.-5.*rich))**2)
-	          dift(iz)=difk(iz)
-	        else
-	          difk(iz)=mixl**2*def*b
-	          dift(iz)=difk(iz)
-	        endif  
-	      else
-	        difk(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
-	        dift(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
-	      endif
-	    
-	    else      
-               if(rich.ge.0) then
-	        if(rich.le.0.2) then
-                difk2(iz)=mixl**2*def*(max(b,(1.-5.*rich))**2)
-	          dift2(iz)=difk2(iz)
-	        else
-	          difk2(iz)=mixl**2*def*b
-	          dift2(iz)=difk2(iz)
-	        endif  
-	      else
-	        difk2(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
-	        dift2(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
-	      endif
-	      ws=(ust_s**3.+7.*karm*wstar**3.*z(iz)/hbl)**(1./3.) 
-	      Pr=1+(Pr0-1)*exp(-alpha*(z(iz)-eps*hbl)**2./hbl**2.)
+	 if(rich.ge.0) then
+            difk2(iz)=mixl**2.*def*(max(b,(1.-5.*rich))**2.)
+	    dift2(iz)=difk2(iz)
+	 else
+	    difk2(iz)=mixl**2.*def*(min(9.,sqrt(1.-16.*rich)))
+	    dift2(iz)=difk2(iz)*(min(3.,(1.-16.*rich)**0.25))
+         endif
+         
+         if(Fv.gt.0.and.z(iz).le.hbl) then
+	    ws=(ust_s**3.+7.*karm*wstar**3.*z(iz)/hbl)**(1./3.) 
+	    Pr=1+(Pr0-1)*exp(-alpha*(z(iz)-eps*hbl)**2./hbl**2.)
             difk(iz)= karm*ws*z(iz)*(1.-eps2*z(iz)/hbl)**2.
             dift(iz)= difk(iz)/Pr
-!            dift(iz)=2.*dift(iz) !max(dift(iz),dift2(iz))
-!	    difk(iz)=2.*difk(iz) !max(difk(iz),difk2(iz))
-
-            if(z(iz+1).le.hbl) then
-           dift3(iz)=0.85*karm*(min(1.,dR*hbl))**(1./3.)*
-     :               (z(iz)-0.)**2.
-     :              /(hbl-0.)*(1.-(z(iz)-0.)/(hbl-0.))**0.5
-           difk3(iz)=0.75*dift3(iz)
-         !  write(0,*) dift3(iz),dift(iz),(dR*hbl)**(1./3.)
-           endif
-
-           dift(iz)=max(dift(iz),dift3(iz))
-	    difk(iz)=max(difk(iz),difk3(iz))
-
-            !write(0,*) z(iz),dift(iz)            
-          endif
-        endif
+         else
+            dift(iz)=0.
+            difk(iz)=0.
+         endif
+         if(z(iz+1).le.hbl.and.z(iz).ge.hbl*0.75) then
+           dift3(iz) = 0.85*karm*(dR*hbl*g/thv)**(1./3.)*
+     :               (z(iz)-hbl*0.75)**2.
+     :              /(hbl-hbl*0.75)*(1.-(z(iz)-hbl*0.75)
+     :              /(hbl-hbl*0.75))**0.5
+           difk3(iz) = 0.75*dift3(iz)
+         else 
+           dift3(iz)=0.
+           difk3(iz)=0.
+         endif
+         dift2(iz)=max(dift2(iz),dift(iz)+dift3(iz))
+         difk2(iz)=max(difk2(iz),difk(iz)+difk3(iz))
       enddo
 !-------------at the lowest level ------------------------!         
       if(-tst_s.le.0) then
@@ -215,17 +174,21 @@
       xn=g*dthdz/th(1,2)
       rich=xn/(def*def+zero)
       if(-tst_s.le.0) then
-          difk(1)=mixl**2.*def*(max(b,(1.-5.*rich))**2.)
-	    dift(1)=difk(1)
+          difk2(1)=mixl**2.*def*(max(b,(1.-5.*rich))**2.)
+	    dift2(1)=difk(1)
 	else
-	  difk(1)=karm*ws0*z_sl*(1.-z_sl/hbl)**2.
-        dift(1)=difk(1)/Pr0
+	  difk2(1)=karm*ws0*z_sl*(1.-z_sl/hbl)**2.
+        dift2(1)=difk(1)/Pr0
       endif
 	
       do iz = 2,nz
-         dift_hl(iz)=0.5*(dift(iz-1)+dift(iz))
-         difk_hl(iz)=0.5*(difk(iz-1)+difk(iz))
+         dift_hl(iz)=0.5*(dift2(iz-1)+dift2(iz))
+         difk_hl(iz)=0.5*(difk2(iz-1)+difk2(iz))
+         dift_hl2(iz)=0.5*(dift(iz-1)+dift(iz))
+         difk_hl2(iz)=0.5*(difk(iz-1)+difk(iz))
+         dift_hl3(iz)=dift_hl(iz)
          if (z(iz-1).lt.hbl.and.z(iz).gt.hbl) then 
+            dift_hl3(iz)=0.
 !          dift_hl(iz)=dift(iz)
 !          dift_hl(iz-1)=dift(iz-2)
 !         h3e(iz)=-wth_h
@@ -253,33 +216,28 @@
 
       !      if (implicit) then
       do iz=1,nz-1
-      F(iz)=th(iz,1) +dtl/(0.5*dz(iz)+dz(iz+1))*
-     :        (gammah*(dift_hl(iz)-dift_hl(iz+1)))         ! right-hand side
+      F(iz)=th(iz,1)  +dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammah*(dift_hl2(iz)-dift_hl2(iz+1)))         ! right-hand side
       enddo
-      F(nz)=th(nz,1)+dtl/dz(nz)*gammah*dift_hl(nz)
+      F(nz)=th(nz,1)+dtl/dz(nz)*gammah*dift_hl2(nz)
       call implicit_dif(F,th(1:nz,1),dift_hl,ust_s*tst_s,difunt2)
       F(1:nz)=u(1:nz,1)
       call implicit_dif(F,u(1:nz,1),difk_hl,cdm*u(1,2),difunu2)
       F(1:nz)=v(1:nz,1)
       call implicit_dif(F,v(1:nz,1),difk_hl,cdm*v(1,2),difunv2)
       do iz=1,nz-1
-      F(iz)=qv(iz,1) +dtl/(0.5*dz(iz)+dz(iz+1))*
-     :        (gammaq*(dift_hl(iz)-dift_hl(iz+1)))         ! right-hand side
+      F(iz)=qv(iz,1)+dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammaq*(dift_hl2(iz)-dift_hl2(iz+1)))         ! right-hand side
       enddo
-      F(nz)=qv(nz,1)+dtl/dz(nz)*gammaq*dift_hl(nz)
+      F(nz)=qv(nz,1)+dtl/dz(nz)*gammaq*dift_hl2(nz)
       call implicit_dif(F,qv(1:nz,1),dift_hl,ust_s*qst_s,difunqv2)
       F(1:nz)=qc(1:nz,1)
-      call implicit_dif(F,qc(1:nz,1),dift_hl,0.,difunqc2)
+      call implicit_dif(F,qc(1:nz,1),dift_hl3,0.,difunqc2)
       F(1:nz)=qr(1:nz,1)
       call implicit_dif(F,qr(1:nz,1),dift_hl,0.,difunqr2)
 !         else
 !         endif
 
-!       do iz=1,nz-1
-!      difunt2(iz)=difunt2(iz)+1./(0.5*dz(iz)+dz(iz+1))*
-!     :        (gammah*(dift_hl(iz)-dift_hl(iz+1))-h3e(iz)+h3e(iz+1))         ! right-hand side
-!      enddo
-	
 	do iz=2,nz
         def13(iz)=def13(iz)*0.5*(difk(iz)+difk(iz-1))
         def23(iz)=def23(iz)*0.5*(difk(iz)+difk(iz-1))
@@ -364,6 +322,16 @@
      :             -wq3(iz)-wq3_c(iz)-wq3e(iz))
      :             /(0.5*(dz(iz+1)+dz(iz)))
  !        write(0,*) difunqv(iz)
+          if(z(iz).gt.hbl.and.z(iz-1).lt.hbl) then
+            write(0,*) 'rad = ', rad(iz)
+            write(0,*) 'advection =',-vat(iz)
+            write(0,*) 'diff =', difunt2(iz)
+            write(0,*) 'cond =',
+     :        hlat/cp*condensat(iz)
+            tende= difunt2(iz)+rad(iz)-vat(iz)+
+     :         hlat/cp*condensat(iz)
+            the = th(iz,2)
+            endif
       enddo
 
       if (ifwr.ne.0) then

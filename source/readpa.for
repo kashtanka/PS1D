@@ -18,6 +18,15 @@
 
       itext=0
       inperr=0
+      
+      difloc=.false.
+      nonloc_tm86=.false.
+      nonloc_ls96=.false.
+      nonloc_noh03=.false.
+      nonloc_lock=.false.
+      loc_inm=.false.  
+
+
       do while(inperr.eq.0)
         read(29,'(a)') line
 c        write(*,*) line
@@ -80,6 +89,21 @@ c
           if (iodif.eq.6) nonloc_noh03=.true.
           if (iodif.eq.7) nonloc_lock=.true.
           if (iodif.eq.8) loc_inm=.true.
+        elseif(keyword(1:nchark).eq.'implicit') then
+          read(27,*,iostat=inperr) implicit
+          write(*,*) 'implicit=',implicit
+        elseif(keyword(1:nchark).eq.'inifile') then
+          read(27,*,iostat=inperr) inifile
+          write(*,*) 'inifile=',inifile
+        elseif(keyword(1:nchark).eq.'radif') then
+          read(27,*,iostat=inperr) radif
+          write(*,*) 'radif=',radif
+          elseif(keyword(1:nchark).eq.'iftf') then
+          read(27,*,iostat=inperr) iftf
+          write(*,*) 'iftf=',iftf
+        elseif(keyword(1:nchark).eq.'vadv') then
+          read(27,*,iostat=inperr) vadv
+          write(*,*) 'vadv=',vadv
         elseif(keyword(1:nchark).eq.'ifhle') then
           read(27,*,iostat=inperr) ifhle
           write(*,*) 'ifhle=',ifhle
@@ -98,6 +122,8 @@ c
         elseif(keyword(1:nchark).eq.'phi') then
           read(27,*,iostat=inperr) phi
           write(*,*) 'phi=',phi
+          phi=phi/180.*pi
+          fcor=2.*omega*sin(phi)
         elseif(keyword(1:nchark).eq.'tfix') then
           read(27,*,iostat=inperr) tfix
           write(*,*) 'tfix=',tfix
@@ -125,6 +151,13 @@ c
           dzpro=zthdat(ndat)/npro
           pressdat(0)=pa
           write(*,*) 'Profile given'
+        elseif(keyword(1:nchark).eq.'tforcing') then
+           read(29,*,iostat=inperr) ntfc
+           call allocforcing
+           do ii = 0,ntfc
+              read(29,*,iostat=inperr) zfc(ii),tfcdat(ii)
+           enddo
+           
         endif
         enddo
       end subroutine readpa
@@ -155,4 +188,13 @@ c
           if(allocated(pressdat)) deallocate(pressdat)
           allocate(pressdat(0:ndat))
       
+      end
+
+      subroutine allocforcing
+      use alloc_1d
+      if(allocated(zfc)) deallocate(zfc)
+      allocate(zfc(0:ntfc))
+      if(allocated(tfcdat)) deallocate(tfcdat)
+      allocate(tfcdat(0:ntfc))
+      tfcdat=0.
       end

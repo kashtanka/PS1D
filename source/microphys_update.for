@@ -29,7 +29,6 @@
 ! Tendencies related with liquid phase are added
 ! to prognostic variables    
 !-------------------------------------------------!  
-
         do iz=1,nz
           qv(iz,3)=qv(iz,3)+dtl*
      :      (evap(iz)) 

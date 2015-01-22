@@ -2,7 +2,7 @@
       use alloc_1d
       implicit none
       integer iz,id,it
-      real dtd,dzd,dvd,dud,dqd,height
+      real dtd,dzd,dvd,dud,dqd,height,dtfc
       real*8 F, Fwt,pm,C1,C2,DIV
       real,external:: qsat
       do id=0,ndat-1
@@ -24,6 +24,22 @@
       
       enddo
       enddo
+
+      if (iftf) then
+         do id = 0,ntfc
+            dtfc = tfcdat(id+1) - tfcdat(id)
+            dzd=zfc(id+1)-zfc(id)
+            do iz=0,nz
+               height=(z(iz)-z_sl)
+               if (height.ge.zfc(id).and.
+     :             height.le.zfc(id+1)) then
+                  tfc(iz)=tfcdat(id)+dtfc*(height - zfc(id))/dzd
+                  tfc(iz)=tfc(iz)*dt/3600.
+                  write(0,*) height,tfc(iz)
+               endif
+            enddo
+         enddo
+      endif
       th0(0)=th0(1)
       
       do iz=0,nz
@@ -47,16 +63,17 @@
       qv(iz,3)=0.
       endif
       enddo
+      if(inifile.eq.0) then
       !!-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-!!
       !! initialization for marine Sc case   !!
       !!-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-!!
       do iz = 0,nz
-         if (z(iz)-z_sl.le.835) then
+         if (z(iz)-z_sl.le.840) then
             qv(iz,2)=9.e-3
             th(iz,2)=289.
          else
             qv(iz,2)=1.5e-3
-            th(iz,2)=297.5+(z(iz)-z_sl-835.)**(1./3.)
+            th(iz,2)=297.5+(z(iz)-z_sl-840.)**(1./3.)
          endif
          qv(:,1)=qv(:,2)
          qv(:,3)=qv(:,2)
@@ -65,6 +82,7 @@
          u(:,:)=ug
          v(:,:)=vg
       enddo
+      endif
 !     vertical wind speed at half-levels
       DIV=3.75e-6      ! large-scale divergence
       w(1)=0.
@@ -100,9 +118,9 @@
       do iz =1,nz
       t(iz)=th(iz,2)*(p(iz,2)/p00)**akapa
       if (qif.ne.0) then
- !     qv(iz,1)=0.4*qsat(t(iz),p(iz,1))
- !     qv(iz,2)=0.4*qsat(t(iz),p(iz,1))
- !     qv(iz,3)=0.4*qsat(t(iz),p(iz,1))
+      qv(iz,1)=0.4*qsat(t(iz),p(iz,1))
+      qv(iz,2)=0.4*qsat(t(iz),p(iz,1))
+      qv(iz,3)=0.4*qsat(t(iz),p(iz,1))
       endif
       !vgeos(iz)=z(iz)/z(nz)*vg
       !v(iz,1)=vgeos(iz)

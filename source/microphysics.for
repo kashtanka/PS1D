@@ -15,9 +15,9 @@
 ! are calucalted
 !-------------------------------------!
 !        call evaporate
- !       call convert
-  !      call collect
-  !      call rain
+        call convert
+        call collect
+        call rain
       endif
       
       if(ifmf.ne.0) then

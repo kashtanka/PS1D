@@ -55,14 +55,14 @@
       dR=0.
       mdR=0.
       do iz=1,nz-1
-         rad(iz)=-(rfl(iz)-rfl(iz-1))/(0.5*(dz(iz+1)+dz(iz)))/cp/ro(iz)
+         rad(iz)=-(rfl(iz+1)-rfl(iz))/(0.5*(dz(iz+1)+dz(iz)))/cp/ro(iz)
 !         write(0,*) rad(iz),qc(iz,2)
 !         dR=(rfl(iz)-rfl(iz-1))/cp/ro(iz)
 !         if (dR.gt.mdR) mdR=dR
 !         write(0,*) z(iz),rad(iz),qc(iz,2)
          if (z(iz).lt.hbl.and.z(iz+1).ge.hbl) then
             dR=(rfl(iz)-rfl(iz-1))/cp/ro(iz)
-            Fplus = rfl(iz)
+            Fplus = rfl(iz+1)
  !           write(0,*) dR,(rfl(iz)-rfl(iz-3))/cp/ro(iz)
          endif
       enddo

@@ -29,7 +29,7 @@
       do iz=1,nz
         t(iz)=th(iz,2)*(p(iz,2)/p00)**akapa
         if (qif.ne.0) then
-           ro(iz)=p(iz,2)/(r*t(iz)) ! ro(iz)=p(iz,2)/(r*t(iz)*(1.+0.61*qv(iz,2)))
+           ro(iz)=p(iz,2)/(r*t(iz)) ! ro(iz)=p(iz,2)/(r*t(iz)*(1.+0.61*qv(iz,2)))          
         else
           ro(iz)=p(iz,2)/(r*t(iz))
         endif	

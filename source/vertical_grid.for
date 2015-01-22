@@ -9,6 +9,6 @@
       enddo
       z_sl=0.5*z(1)
       do iz=1,nz
-      dz(iz)=z(iz)-z(iz-1)
+         dz(iz)=z(iz)-z(iz-1)
       enddo
       end

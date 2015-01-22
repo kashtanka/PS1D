@@ -5,17 +5,25 @@
      : Ribulk,dzita,rhoa,z1,tau,water,tems,ustar,Tstar,
      : qstar,temsfc
       real,external:: qsat
+      integer i
       
       water=0.
       ta=th(1,2)
-      ts=241.00
+      ts=241.15
       z0=0.001
+      ts = 241.15-dt*nstep/3600.*0.25
+      write(0,*) ts
       
-      if(dt*nstep.gt.3600.*icetime) then
-      ts=292.5
-      water=1.
-      endif
-      
+!      do i = 1,100
+!      if(dt*nstep.gt.3600*12.and.dt*nstep.gt.3600.*icetime*i.and.
+!     :  dt*nstep.le.3600*(icetime+0.01)*i)
+!     : then
+!         ts=268.15
+!         water=1.
+!      goto 111
+!      endif
+!      enddo
+ 111  continue
       th(0,3)=ts
       th(0,2)=ts
       th(0,1)=ts
@@ -27,13 +35,8 @@
       else
         qa=0.
       endif
-       rhoa=ro(1)
+      rhoa=ro(1)
        
-      ! qa=0.0005
-      ! uvs=10.
-      ! ta=250.
-      
-      
       call surf_scheme3(water,
      :       ta,ts,qa,
      :       uvs,ps,z_sl,z0,
@@ -42,29 +45,16 @@
      
       cdm=cdu
       ust_s=ustar
-	tst_s=Tstar
-        if (qif.ne.0) then
-           qst_s=qstar
-        else
-        qst_s=0.
-        endif
-	dzits=dzita
-	h=hflux
-	le=Elatent
-!-------DYCOMSII surface forcing------------------!
-        h=15.
-        le=115.
-        ust_s=0.25
-        tst_s=-h/ro(1)/cp/ust_s
-        qst_s=-le/ro(1)/hlat/ust_s
-  !      write(0,*) qst_s,qstar
-        cdm=ust_s**2/uvs
-        dzits=z_sl/(ust_s**2*th(1,2))*(g*0.4*tst_s)
-!        write(0,*) dzita
-!---------------------------------------------------!
+      tst_s=Tstar
+      if (qif.ne.0) then
+         qst_s=qstar
+      else
+         qst_s=0.
+      endif
+      dzits=dzita
+      h=hflux
+      le=Elatent
       Fv=-ust_s*tst_s-0.61*t(1)*ust_s*qst_s
-    !  write(0,*)dt*nstep,qsat(252.,p(1,2)),qv(1,2)
-    !  write(0,*)Tstar,qstar,ustar
       end
       
       subroutine surf_scheme3(xsea,temp2,temp1,q2,uv2,p,z2,z0,cdu,hflux,
@@ -324,18 +314,18 @@
 	  if (dL.lt.5) then
 	     if(L.gt.z2) then
 		 if(dL.lt.1) goto 33
-		 L=(Lit+L)/2.
+		    L=(Lit+L)/2.
 		 else
-		 if(dL.lt.0.2) goto 33
-		 L=Lit
+		    if(dL.lt.0.2) goto 33
+		    L=Lit
 		 endif
-        endif
+              endif
 	  if(iter.gt.1) then
-	  L=(Lit+L)/2.
+	     L=(Lit+L)/2.
 	  else
-	  L=Lit
+	     L=Lit
 	  endif
-        goto 20
+          goto 20
 	  endif
 
       

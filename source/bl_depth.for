@@ -41,7 +41,7 @@
      :    *(z(iz+1)-z(iz)))
       mz=int(iz/2.)
       
-      hbl1=z(iz)+0.1           !easy option, but not smooth
+ !     hbl1=z(iz)+0.1           !easy option, but not smooth
       goto 30
       endif
       enddo
@@ -72,15 +72,15 @@
       w_m3=wstar**3.+B*ust_s**3.
       wth_h=-A*w_m3/hbl
       th_m=b_t*abs(wth_h)/ws_m !b_0*abs(Fv)/ws_m !
-      th_h=th(mz,2)+th_m !th(1,2)+th_m !
+!      th_h=th(mz,2)+th_m !th(1,2)+th_m !
       
-      do iz = mz,nz-1
-      if(th(iz,2)-hlat/cp*qc(iz,2).lt.th_h
-     : .and.th(iz+1,2)-hlat/cp*qc(iz+1,2).ge.th_h) then
-      hbl3=z(iz)+(z(iz+1)-z(iz))*(th_h-th(iz,2)+hlat/cp*qc(iz,2))
-     : /(th(iz+1,2)-hlat/cp*qc(iz+1,2)-th(iz,2)+hlat/cp*qc(iz,2))
-      endif
-      enddo
+!      do iz = mz,nz-1
+!      if(th(iz,2)-hlat/cp*qc(iz,2).lt.th_h
+!     : .and.th(iz+1,2)-hlat/cp*qc(iz+1,2).ge.th_h) then
+!      hbl3=z(iz)+(z(iz+1)-z(iz))*(th_h-th(iz,2)+hlat/cp*qc(iz,2))
+!     : /(th(iz+1,2)-hlat/cp*qc(iz+1,2)-th(iz,2)+hlat/cp*qc(iz,2))
+!      endif
+!      enddo
       
       enddo
 
@@ -110,6 +110,6 @@
       
       
      
-50    hbl=hbl4   !max(hbl3,hbl1)
+50    hbl=hbl1   !max(hbl3,hbl1)
       write(0,*) 'hbl=',hbl1,hbl4
       end

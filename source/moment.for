@@ -5,16 +5,7 @@
       real dpdz0,dpdz
       dpdz0=1.5e-3
       dpdy=0.
-       do iz=1,nz-1
-         vau(iz)=w(iz)*(u(iz+1,1)-
-     :   u(iz,1))/
-     :   (0.5*(dz(iz)+dz(iz+1)))
-         vav(iz)=w(iz)*(v(iz+1,1)-
-     :   v(iz,1))/
-     :   (0.5*(dz(iz)+dz(iz+1)))
-      enddo
-!      vau=0.
-!      vav=0.
+
       do iz=1,nz
       u(iz,3)=u(iz,1)+dtl*(fcor*(v(iz,2)-vg)+difunu(iz)
      :        -vau(iz)) !-vgeos(iz))+difunu(iz)) 

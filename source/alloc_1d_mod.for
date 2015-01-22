@@ -1,31 +1,31 @@
       module alloc_1d
       
       integer:: ns,ndat,npro,nz,ntime
-      integer:: nstep
+      integer:: nstep,ntfc
       integer:: ifhle,tfix  
       real(kind(0.d0)):: dt,dtl
       integer::
      :  ioreft,iorefq,iorefu,iorefv,ndth,ndus,ndvs,ndqvs
-      integer :: iodif
+      integer :: iodif,inifile
       real(kind(0.d0)):: pts0,pa,fcor
       real(kind(0.d0)):: t0ini,ug,vg,psref,dzpro
       real(kind(0.d0)):: cdm,ust_s,tst_s,qst_s,dzits,ts,hbl,Fv,h,le,zct
       real(kind(0.d0)):: zc2,dR
       real(kind(0.d0)):: r,cp,g,akapa,qif,p00,omega,pi,entrt,hlat,ifwr,
      : ifmf 
-      real(kind(0.d0)):: z_sl,ztop,distY,distYice,icetime
+      real(kind(0.d0)):: z_sl,ztop,distY,distYice,icetime,the,tende
       real(kind(0.d0)):: ablv,dy,p0,dpdy_d,phi,ptop,bl_dpdy
       real(kind(0.d0)):: cond_heat,mth,mqv,mqc,mqr,mqci,mqsn
       parameter(r=287.05,cp=1005.,g=9.8066,akapa=r/cp,p00=1.e5,
      :          omega=7.2921e-5,pi=3.141593,hlat=2.501e6,
      :          hsub=2.837e6,hfus=3.336e5)
-      
+      logical implicit,radif,vadv,iftf
       real(kind(0.d0)),allocatable,dimension(:)::
      :   thdat,usdat,vsdat,qvsdat,thl
      :   ,zthdat,zusdat,zvsdat,zqvsdat,psdat,ptdat,pressdat
      :   ,tedat,dz,th0,h3,u0,v0,sh3,qv0,h3c,h3e,ug_bar,ht,mom,wq3,
      :   t,ro,qc0,qr0,dpdy,vgeos,qci0,qsn0,condensat,sublim,w,
-     :   vat,rad,rfl,vaq,vaqc,vau,vav,wq3_c,wq3e,ri
+     :   vat,rad,rfl,vaq,vaqc,vau,vav,wq3_c,wq3e,ri,zfc,tfc,tfcdat
       real(kind(0.d0)),allocatable,dimension(:,:)::
      : u,v,th,qv,p
      
