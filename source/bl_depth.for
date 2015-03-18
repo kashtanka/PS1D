@@ -22,8 +22,8 @@
      
 
       do iz=2,nz
-         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+0.5) then
-            hbl4=z(iz)-5.
+         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+0.0) then
+            hbl4=z(iz)-2. !dz(iz)/2
             !write(0,*) z(iz),th(iz,2),th(1,2)
             goto 20
          endif
@@ -70,7 +70,7 @@
       wstar=(g/thv*Fv*hbl)**(1./3.)
       ws_m=(ust_s**3.+7.*karm*wstar**3.*0.5)**(1./3.)
       w_m3=wstar**3.+B*ust_s**3.
-      wth_h=-A*w_m3/hbl
+      !wth_h=-A*w_m3/hbl
       th_m=b_t*abs(wth_h)/ws_m !b_0*abs(Fv)/ws_m !
 !      th_h=th(mz,2)+th_m !th(1,2)+th_m !
       
@@ -110,6 +110,95 @@
       
       
      
-50    hbl=hbl1   !max(hbl3,hbl1)
+50    hbl=hbl4   !max(hbl3,hbl1)
       write(0,*) 'hbl=',hbl1,hbl4
+
+      if (nstep.eq.1) then
+         call reconstruction 
+         zi1 = zi_rec
+         zi2 = zi_rec
+      endif
+      
+      call zi_prognostic
+      call reconstruction
+
+      end
+
+      subroutine reconstruction
+      use alloc_1d
+      implicit none
+      real*8 a,b,c,d,deltaz,gfa,gml
+      real*8 th2(1:nz)
+      integer kt,iz
+      write(0,*) 'hbl=',hbl,wth_h
+      do iz = 2,nz-1
+         if (nstep.eq.1.and.z(iz).gt.hbl.and.z(iz-1).lt.hbl) kt = iz-1
+         if (nstep.ne.1.and.0.5*(z(iz)+z(iz+1))
+     :      .ge.hbl.and.0.5*(z(iz-1)+z(iz)).le.hbl) then
+           kt = iz-1
+           WRITE(0,*) 'kt = ',kt
+         endif
+         th2(iz)=th(iz,2)-hlat/cp*qc(iz,2)
+      enddo
+      gfa = (th2(kt+3)-th2(kt+2))/dz(kt+2)
+      gml = (th2(kt) - th2(kt-1))/dz(kt)
+      if (nstep.eq.1.and.gfa.eq.0.and.gml.eq.0) then
+         zi_rec = (0.5*(z(kt+1)+z(kt+2))*(th2(kt+2)-th2(kt+1))+
+     :            0.5*(z(kt)+z(kt+1))*(th2(kt+1)-th2(kt)))/
+     :             (th2(kt+2)-th2(kt))
+      else
+         a = 0.5*(gfa - gml)
+         b = - (th2(kt+2)-gfa*(z(kt+2)-0.5*(z(kt+1)+z(kt+2))))+
+     :    (th2(kt)+gml*(0.5*(z(kt+1)+z(kt+2))-z(kt)))
+         c = (0.5*(z(kt+1)+z(kt+2))-0.5*(z(kt)+z(kt+1)))*
+     :    (th2(kt+1) - (th2(kt) + gml*(z(kt+1) - z(kt))))
+         d = b**2. - 4.*a*c
+         deltaz = 0.5*(-b-sqrt(d))/a
+         if(nstep.eq.1) then
+            zi_rec = 0.5*(z(kt+1)+z(kt+2))-deltaz
+         endif
+      endif
+      write(0,*) 'zi_rec =',zi_rec,z(kt),z(kt+1),z(kt+2)
+      write(0,*) th2(kt),th2(kt+1),th2(kt+2)
+      
+      thzi = th(kt,2)+(zi_rec - z(kt))*(th(kt,2)-th(kt-1,2))
+     :      /(dz(kt))
+      qczi = qc(kt,2)+(zi_rec - z(kt))*(qc(kt,2)-qc(kt-1,2))
+     :      /dz(kt)
+      qvzi = qv(kt,2)+(zi_rec - z(kt))*(qv(kt,2)-qv(kt-1,2))
+     :      /dz(kt)
+      delta_th = th(kt+2,2)-(z(kt+2)-zi_rec)*(th(kt+3,2)-th(kt+2,2))
+     :      /dz(kt+2) - thzi
+      delta_qc = qc(kt+2,2)-(z(kt+2)-zi_rec)*(qc(kt+3,2)-qc(kt+2,2))
+     :      /dz(kt+2) - qczi
+      delta_qv = qv(kt+2,2)-(z(kt+2)-zi_rec)*(qv(kt+3,2)-qv(kt+2,2))
+     :      /dz(kt+2) - qvzi
+      end
+
+      subroutine zi_prognostic
+      use alloc_1d
+      implicit none
+      real*8 w_ls,zi
+      integer iz
+      
+      do iz = 2, nz-1
+  !       if(z(iz).gt.hbl.and.z(iz-1).lt.hbl) then
+         if (0.5*(z(iz)+z(iz+1))
+     :      .ge.hbl.and.0.5*(z(iz-1)+z(iz)).lt.hbl) then
+            w_ls = 0.5*(w(iz)+w(iz+1))
+            w_e = 0 !-1e-3 !wth_h/(delta_th+0.61*th(iz,2)*delta_qv)
+         endif
+      enddo
+      ! hbl = zi_old
+      ! if (Fv.gt.0) then
+      write(0,*) 'w_e+w_ls', -w_e+w_ls
+         zi = zi1 + dtl*(-w_e + w_ls)
+         hbl = zi2
+         zi_rec=zi2
+         zi1 = zi2
+         zi2 = zi
+      ! else
+      !   zi = hbl
+      ! endif
+
       end

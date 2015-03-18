@@ -60,6 +60,7 @@
       if (ifhle.eq.1) then       ! constant surface fluxes
          call const_fluxes
       endif
+      write(0,*) tst_s*ust_s*ro(1)*cp
       !-----------------------------------------!      
 
       call bl_depth(nonloc_tm86,difloc,nonloc_lock)   !diagnostics of the ABL height

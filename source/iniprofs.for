@@ -87,7 +87,7 @@
       DIV=3.75e-6      ! large-scale divergence
       w(1)=0.
       do iz=2,nz
-         w(iz)=-DIV*0.5*(z(iz-1)+z(iz))
+         w(iz)=-DIV*0.5*(z(iz-1)+z(iz)-z_sl)
       enddo
       
       !---calculate initial pressure profile to define ptop given pa----!
@@ -117,11 +117,11 @@
       
       do iz =1,nz
       t(iz)=th(iz,2)*(p(iz,2)/p00)**akapa
-      if (qif.ne.0) then
-      qv(iz,1)=0.4*qsat(t(iz),p(iz,1))
-      qv(iz,2)=0.4*qsat(t(iz),p(iz,1))
-      qv(iz,3)=0.4*qsat(t(iz),p(iz,1))
-      endif
+!      if (qif.ne.0) then
+!      qv(iz,1)=0.4*qsat(t(iz),p(iz,1))
+!      qv(iz,2)=0.4*qsat(t(iz),p(iz,1))
+!      qv(iz,3)=0.4*qsat(t(iz),p(iz,1))
+!      endif
       !vgeos(iz)=z(iz)/z(nz)*vg
       !v(iz,1)=vgeos(iz)
       !v(iz,2)=vgeos(iz)

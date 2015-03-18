@@ -2,7 +2,7 @@ ps1d
 ###############
 nz 180       # number of vertical grid points
 ztop 1800    # height of the domain top (meters)
-ntime 21600  # total time steps
+ntime 43200  # total time steps
 dt 1       # 
 #### vertical turbulent diffusion ###############
 # options for iodif:
@@ -15,12 +15,12 @@ dt 1       #
 #################################################
 iodif 6     #   turbulent diffusion (see options above)
 implicit .true.  # implicit scheme for diffusion, otherwise expl scheme is used
-radif .true. # radiation
+radif .false. # radiation
 vadv .true.  # vertical advection
 tfix 1       # do not change this
 ifhle 1      # constant surface fluxes (1/0) 
 qif 1        # moisture on/off (1/0)
-ifwr 1       # cloud water and rain on/off (1/0)
+ifwr 0       # cloud water and rain on/off (1/0)
 ifmf 0       # cloud snow on/off (1/0)
 icetime 100    # specific for cold air outbreaks
 ###############

@@ -33,8 +33,8 @@
 !  difunq - d(q'w')/dz
 !  etc.
       karm=0.4      ! von Karman constant
-      zero=1.e-9    ! minumum vertical wind shear
-      b=0.005 ! 0.005  ! fixed value for F(Ri) for strongly-stable stratification
+      zero=1.e-3    ! minumum vertical wind shear
+      b=0.00 ! 0.005  ! fixed value for F(Ri) for strongly-stable stratification
 
 !-------asymptotic mixing length for use in Blackadar formula-----!
       if(Fv.lt.0) then      ! stable stratification

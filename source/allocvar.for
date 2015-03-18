@@ -46,6 +46,15 @@
       if(allocated(vaqc)) deallocate(vaqc)
           allocate(vaqc(0:nz))
           vaqc=0.
+      if(allocated(vat2)) deallocate(vat2)
+          allocate(vat2(0:nz))
+          vat2=0.
+      if(allocated(vaq2)) deallocate(vaq2)
+          allocate(vaq2(0:nz))
+          vaq2=0.
+      if(allocated(vaqc2)) deallocate(vaqc2)
+          allocate(vaqc2(0:nz))
+          vaqc2=0.
       if(allocated(tfc)) deallocate(tfc)
           allocate(tfc(0:nz))
           tfc=0.

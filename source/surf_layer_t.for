@@ -7,12 +7,11 @@
       real,external:: qsat
       integer i
       
-      water=0.
+      water=1.
       ta=th(1,2)
-      ts=241.15
+      ts=292.5
       z0=0.001
-      ts = 241.15-dt*nstep/3600.*0.25
-      write(0,*) ts
+ !     ts = !241.15-dt*nstep/3600.*0.25
       
 !      do i = 1,100
 !      if(dt*nstep.gt.3600*12.and.dt*nstep.gt.3600.*icetime*i.and.
@@ -434,15 +433,15 @@
 	     if(L.gt.z2) then
 		 if(dL.lt.1) goto 35
 		 L=(Lit+L)/2.
-		 else
+             else
 		 if(dL.lt.0.2) goto 35
 		 L=Lit
-		 endif
-      endif
+             endif
+          endif
 	  if(iter.gt.1) then
-	  L=(Lit+L)/2.
+	     L=(Lit+L)/2.
 	  else
-	  L=Lit
+	     L=Lit
 	  endif
       goto 40
 	  

@@ -6,7 +6,7 @@
      :                    qst_s,wq3,wq3c,wq3r,wq3_c,qc,qr,ifwr,cp,hlat,
      :                    t,p,dift2,difk2,dR,wq3e,dift3,difk3,ro,dtl,rad
      :                    ,vat,wth_h,wth_h2,we,condensat,hlat,akapa,p00,
-     :                    the,tende
+     :                    the,tende,delta_th,delta_qv
       implicit none
       integer iz
       real*8 def, ws0,wstar,eps,thv,fi_m,fi_h,Pr0,gammah
@@ -62,7 +62,11 @@
 !     :        *v(1,2)/sqrt(u(1,2)**2.+v(1,2)**2.)
 !-------entrainment------------------------------------------
       w_m3=(wstar**3.+B2*ust_s**3.) +hbl*dR*g/thv
-      wth_h= -6.*w_m3/hbl    
+!      write(0,*) 'wm3=',wstar**3, B2*ust_s**3., hbl*dR*g/thv
+      wth_h= -6.*w_m3/hbl*2.5
+      write(0,*) 'wth_h =', wth_h, hbl
+ !     write(0,*)'we,we=', wth_h/delta_th,
+!     :           wth_h/(delta_th+0.61*270*delta_qv)
 !---------surface Prandtl number-----------------!
       if (Fv.gt.0) then
         fi_m=(1.-7.*dzits)**(-1./3.)
@@ -84,7 +88,7 @@
          eps2=hbl/z(iz-1)*
      :   (1.-sqrt(max(0.,-2.*Pr*(wth_h)*dz(iz)/
      :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))       
-         eps2=min(1.,max(0.7,eps2))         
+         eps2=1. !min(1.,max(0.7,eps2))         
          endif
       enddo
 !-------------maximum mixing length (for use in Blackadar f-la)------!
@@ -138,7 +142,7 @@
 	    dift2(iz)=difk2(iz)*(min(3.,(1.-16.*rich)**0.25))
          endif
          
-         if(Fv.gt.0.and.z(iz).le.hbl) then
+         if(Fv.gt.0.and.0.5*(z(iz+2)+z(iz+1)).le.hbl) then
 	    ws=(ust_s**3.+7.*karm*wstar**3.*z(iz)/hbl)**(1./3.) 
 	    Pr=1+(Pr0-1)*exp(-alpha*(z(iz)-eps*hbl)**2./hbl**2.)
             difk(iz)= karm*ws*z(iz)*(1.-eps2*z(iz)/hbl)**2.
@@ -147,11 +151,11 @@
             dift(iz)=0.
             difk(iz)=0.
          endif
-         if(z(iz+1).le.hbl.and.z(iz).ge.hbl*0.75) then
+         if(0.5*(z(iz+2)+z(iz+1)).le.hbl.and.z(iz).ge.hbl*0.75) then
            dift3(iz) = 0.85*karm*(dR*hbl*g/thv)**(1./3.)*
-     :               (z(iz)-hbl*0.75)**2.
-     :              /(hbl-hbl*0.75)*(1.-(z(iz)-hbl*0.75)
-     :              /(hbl-hbl*0.75))**0.5
+     :               (z(iz)-hbl*0.5)**2.
+     :              /(hbl-hbl*0.5)*(1.-(z(iz)-hbl*0.5)
+     :              /(hbl-hbl*0.5))**0.5
            difk3(iz) = 0.75*dift3(iz)
          else 
            dift3(iz)=0.

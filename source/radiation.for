@@ -55,7 +55,7 @@
       dR=0.
       mdR=0.
       do iz=1,nz-1
-         rad(iz)=-(rfl(iz+1)-rfl(iz))/(0.5*(dz(iz+1)+dz(iz)))/cp/ro(iz)
+         rad(iz)=-(rfl(iz)-rfl(iz-1))/(0.5*(dz(iz+1)+dz(iz)))/cp/ro(iz)
 !         write(0,*) rad(iz),qc(iz,2)
 !         dR=(rfl(iz)-rfl(iz-1))/cp/ro(iz)
 !         if (dR.gt.mdR) mdR=dR
@@ -76,7 +76,7 @@
        dR2 = Fplus*(1. - exp(-0.03*sqrt(LWP)))
        write(0,*) 'dR2 = ',dR2/cp/ro(1)
        write(0,*) 'dR = ', dR
-       write(0,*) 'dRmax =', dRmax
+       write(0,*) 'dRmax =', dRmax*cp*ro(1)
        dR=dRmax
 !      write(0,*) dR2,mdR
 !      rad=0.

@@ -1,0 +1,15 @@
+gfa = 0.4/10;
+gml = 0.08;
+a = 0.5*(gfa-gml);
+thkt2=300;
+thkt=288.9;
+zkt2=855;
+zkt32=850;
+zkt=835;
+b=-(thkt2 -gfa*(zkt2-zkt32))+(thkt+gml*(zkt32-zkt));
+thkt1=293.4;
+zkt12=840;
+zkt1=845;
+c=(zkt32-zkt12)*(thkt1+gml*(zkt-zkt32)-thkt);
+D=b^2-4*a*c;
+dz1 = (-b-(D)^0.5)/2/a
