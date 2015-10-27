@@ -11,6 +11,7 @@
       real, parameter:: A=4.5
       real, parameter:: karm = 0.4
       real*8 dthdz(1:nz)
+      real surf_flux
       dthdz=0.
       
       nlct=0
@@ -22,8 +23,8 @@
      
 
       do iz=2,nz
-         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+0.0) then
-            hbl4=z(iz)-2. !dz(iz)/2
+         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+1.) then
+            hbl4=z(iz)-0.49*dz(iz)
             !write(0,*) z(iz),th(iz,2),th(1,2)
             goto 20
          endif
@@ -46,20 +47,27 @@
       endif
       enddo
 30    continue
-      do iz=1,nz-1
-      if (tst_s*ust_s.lt.0) then
-      if(h3(iz)+h3c(iz)+h3e(iz).ge.0) then
-            hbl2=z(iz)
-            goto 40
-         endif
-         else
-         if(sqrt(def13(iz)**2.+def23(iz)**2.).le.0.05*(ust_s**2.))then
-      hbl2=z(iz)/0.95
-      goto 40
+      if (frac.lt.1) then
+         surf_flux = frac*ust_s*tst_s + (1.-frac)*ust_s2*tst_s2
+      else
+         surf_flux = ust_s*tst_s
       endif
+      if (surf_flux.lt.0) then
+         do iz=1,nz-1
+            if(h3(iz)+h3c(iz)+h3e(iz).ge.0) then
+               hbl2=z(iz)
+               goto 40
+            endif
+         enddo
+      else
+         do iz=1,nz-1
+            if(sqrt(def13(iz)**2.+def23(iz)**2.)
+     :         .le.0.05*(ust_s**2.))then
+               hbl2=z(iz)/0.95
+               goto 40
+            endif
+         enddo
       endif
-   
-      enddo
       
  40   continue
       
@@ -110,36 +118,44 @@
       
       
      
-50    hbl=hbl4   !max(hbl3,hbl1)
-      write(0,*) 'hbl=',hbl1,hbl4
+50    hbl=hbl2 !hbl4   !max(hbl3,hbl1)
+ !     write(0,*) hbl,zi_rec
 
-      if (nstep.eq.1) then
-         call reconstruction 
-         zi1 = zi_rec
-         zi2 = zi_rec
-      endif
+ !     if (nstep.eq.1) then
+ !        call reconstruction 
+ !        zi1 = zi_rec
+ !        zi2 = zi_rec
+ !     endif
       
-      call zi_prognostic
-      call reconstruction
-
+  !    call zi_prognostic
+  !    call reconstruction
+  !    hbl = zi_rec
       end
 
       subroutine reconstruction
       use alloc_1d
       implicit none
-      real*8 a,b,c,d,deltaz,gfa,gml
+      real*8 a,b,c,d,deltaz,gfa,gml,sumth,thm,xnum
       real*8 th2(1:nz)
       integer kt,iz
-      write(0,*) 'hbl=',hbl,wth_h
+   !   write(0,*) 'hbl=',hbl,wth_h
+      sumth=0.
+      xnum =0.
       do iz = 2,nz-1
          if (nstep.eq.1.and.z(iz).gt.hbl.and.z(iz-1).lt.hbl) kt = iz-1
          if (nstep.ne.1.and.0.5*(z(iz)+z(iz+1))
      :      .ge.hbl.and.0.5*(z(iz-1)+z(iz)).le.hbl) then
            kt = iz-1
-           WRITE(0,*) 'kt = ',kt
+!           WRITE(0,*) 'kt = ',kt
          endif
-         th2(iz)=th(iz,2)-hlat/cp*qc(iz,2)
+!         if (z(iz).gt.hbl.and.z(iz-1).lt.hbl) kt = iz-1
+         th2(iz)=th(iz,2)-hlat/cp*qc(iz,2)*th(iz,2)/t(iz)
+         if (z(iz).lt.hbl) then
+            sumth = sumth+th2(iz)
+            xnum=xnum+1
+         endif
       enddo
+      thm=sumth/xnum
       gfa = (th2(kt+3)-th2(kt+2))/dz(kt+2)
       gml = (th2(kt) - th2(kt-1))/dz(kt)
       if (nstep.eq.1.and.gfa.eq.0.and.gml.eq.0) then
@@ -155,11 +171,14 @@
          d = b**2. - 4.*a*c
          deltaz = 0.5*(-b-sqrt(d))/a
          if(nstep.eq.1) then
-            zi_rec = 0.5*(z(kt+1)+z(kt+2))-deltaz
-         endif
+            zi_rec = 0.5*(z(kt)+z(kt+1))+0.1
+        endif
       endif
-      write(0,*) 'zi_rec =',zi_rec,z(kt),z(kt+1),z(kt+2)
-      write(0,*) th2(kt),th2(kt+1),th2(kt+2)
+!      write(0,*) 'zi_rec =',zi_rec,z(kt),z(kt+1),z(kt+2)
+!      write(0,*) 'Discriminant =', d
+!      if(nstep.eq.145) stop
+      
+  !    write(0,*) th2(kt),th2(kt+1),th2(kt+2)
       
       thzi = th(kt,2)+(zi_rec - z(kt))*(th(kt,2)-th(kt-1,2))
      :      /(dz(kt))
@@ -173,6 +192,10 @@
      :      /dz(kt+2) - qczi
       delta_qv = qv(kt+2,2)-(z(kt+2)-zi_rec)*(qv(kt+3,2)-qv(kt+2,2))
      :      /dz(kt+2) - qvzi
+   !   if (hbl.ge.900) then
+   !         write(0,*) hbl, delta_th,delta_qc,delta_qv
+           ! stop
+  !       endif
       end
 
       subroutine zi_prognostic
@@ -185,16 +208,21 @@
   !       if(z(iz).gt.hbl.and.z(iz-1).lt.hbl) then
          if (0.5*(z(iz)+z(iz+1))
      :      .ge.hbl.and.0.5*(z(iz-1)+z(iz)).lt.hbl) then
-            w_ls = 0.5*(w(iz)+w(iz+1))
-            w_e = 0 !-1e-3 !wth_h/(delta_th+0.61*th(iz,2)*delta_qv)
+            w_ls =  0.5*(w(iz)+w(iz+1))
+ !           delta_th = 9.
+ !           delta_qv = 8.e-3
+ !           delta_qc = 1.e-3
+            w_e = wth_h/(delta_th+0.61*th(iz,2)*delta_qv)
+            !w_e = -1.5e-3
          endif
       enddo
       ! hbl = zi_old
       ! if (Fv.gt.0) then
-      write(0,*) 'w_e+w_ls', -w_e+w_ls
+!      write(0,*) 'w_e+w_ls', -w_e+w_ls
          zi = zi1 + dtl*(-w_e + w_ls)
-         hbl = zi2
-         zi_rec=zi2
+         
+         hbl = zi1
+         zi_rec=zi1
          zi1 = zi2
          zi2 = zi
       ! else

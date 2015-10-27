@@ -3,14 +3,14 @@
 ! prongnostic variables:
      : qv,qc,qci,th,
 ! diagnostic variable:
-     : t,p,qs,
+     : t,p,qs,cond2,
 ! model parameters:
      : nz,dz,dtl,ifmf,ifwr,hbl,
 ! constants:
      : hlat,hsub,cp,p00,Thom,Tfrz,akapa,
      : condensat,sublim,z
       implicit none
-      real*8 cond2,subl2
+      real*8 subl2
       real, external:: qsat,esat,qsati
       real*8 qsatur,rasrv,temp
       real*8 DEP,CND,A1,A2,A3,r1,r2,dq,xMo,xNice
@@ -25,7 +25,6 @@
       if (ifwr.ne.0.and.ifmf.eq.0) then
         do iz=1,nz
           rasrv=287.05/461.51
-         ! temp=th(iz,2)*(p00/p(iz,2))**akapa
           qsatur=qsat(t(iz),p(iz,2))
           if(qv(iz,3).gt.qsatur.or.qc(iz,3).gt.0.) then
             cond2=-min(qc(iz,3)
@@ -40,8 +39,8 @@
 !             endif
           qv(iz,3)=qv(iz,3)+dtl*(-cond2)
           qc(iz,3)=qc(iz,3) +dtl*cond2
-          th(iz,3)=th(iz,3)+dtl*hlat/cp !*(p00/p(iz,2))**akapa
-     :    *(cond2)
+          th(iz,3)=th(iz,3)+dtl*hlat/cp
+     :    *(cond2)*(p00/p(iz,2))**akapa
  !         write(0,*)z(iz),hlat/cp*cond2
  !         write(0,*) z(iz),p(iz,2)
           condensat(iz)=cond2

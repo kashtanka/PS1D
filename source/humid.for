@@ -8,9 +8,9 @@
       if (ifwr.ne.0) then
         do iz=1,nz
           qv(iz,3)=qv(iz,1)+dtl*
-     :     (difunqv(iz)-vaq(iz))
+     :     (difunqv(iz) -vaq(iz)) !-condensat(iz)) !-vaq(iz))
           qc(iz,3)=qc(iz,1) +dtl*
-     :     (difunqc(iz)-vaqc(iz))
+     :     (difunqc(iz) -vaqc(iz)) !+condensat(iz)) !-vaqc(iz))
           qr(iz,3)=qr(iz,1)+dtl*
      :     (difunqr(iz))
         if (ifmf.ne.0) then

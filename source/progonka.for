@@ -27,4 +27,5 @@
       do i = 1,nz
          difunt(i)=(y(i)-F1(i))/dtl
       enddo
+! POTOKI
       end

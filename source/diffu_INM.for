@@ -3,7 +3,7 @@
       implicit none
       real*8 lmax,lmax_h,mixl,xn,def,rich,mixl_h,F_ml
       real*8 Fm,Fh,dudz,dthdz
-      real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz)
+      real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz),difq_hl(1:nz)
       real*8 difunt2(1:nz),difunu2(1:nz),difunv2(1:nz),
      :       difunqv2(1:nz),difunqc2(1:nz),difunqr2(1:nz),
      :       difunqci2(1:nz),difunqsn2(1:nz)
@@ -13,10 +13,13 @@
       real, parameter:: d = 5.
       real, parameter:: zero = 1.e-8
       real, parameter:: b = 5.
-      real, parameter:: c = b**2./sqrt(3.)
+      real c
       real, parameter:: ricr = 2./(3.*d)    ! limit for Richardson number in stable stratification
-      dift_hl=0.
+      
+	c = b**2./sqrt(3.)
+	dift_hl=0.
       difk_hl=0.
+      difq_hl=0.
 !%%%%%%%%% INM LOCAL CLOSURE %%%%%%%%%%%%%%%%%%%
 !  def    - vertical wind shear
 !  mixl   - mixing length
@@ -44,8 +47,8 @@
 
 
 !--------- asymptotic length scale lmax at z --> inf
-      lmax = 160.                    ! for momentum
-      lmax_h = sqrt(3.*d/2.)*lmax    ! for heat and scalars
+      lmax = 16 !160.                    ! for momentum
+      lmax_h = 16 !sqrt(3.*d/2.)*lmax    ! for heat and scalars
 
       do iz=2,nz-1
         def=max(zero,dsqrt(((u(iz+1,2)-u(iz-1,2))
@@ -61,9 +64,9 @@
      :           /(z(iz+1)-z(iz-1))/
      :           th(iz,2)/(1.+0.61*qv(iz,2))
             else   
-               if(qv(iz,2)
-     :             .ge.0.95*qsat(t(iz),p(iz,2))) then        
-!            xn=g*(1+hlat*qsat(t(iz),p(iz,2))/r/t(iz))
+               if(qv(iz+1,2)
+     :             .ge.0.9*qsat(t(iz+1),p(iz+1,2))) then        
+!              xn=g*(1+hlat*qsat(t(iz),p(iz,2))/r/t(iz))
 !     :      *(1+0.622*hlat**2.*qsat(t(iz),p(iz,2))/cp/r/t(iz)**2)**(-1)
 !     :      *((log(th(iz+1,2))
 !     :      -log(th(iz-1,2)))/(z(iz+1)-z(iz-1))+
@@ -71,9 +74,11 @@
 !     :       qsat(t(iz-1),p(iz-1,2))))/(z(iz+1)-z(iz-1))-
 !     :       g*(qv(iz+1,2)+qc(iz+1,2)-qv(iz-1,2)-qc(iz-1,2))/
 !     :       (z(iz+1)-z(iz-1))
-                    xn=g*((th(iz+1,2)-hlat/cp*qc(iz+1,2))
-     :              -(th(iz-1,2)-hlat/cp*qc(iz-1,2)))
-     :              /(z(iz+1)-z(iz-1))/th(iz,2)
+                    xn=g*((th(iz+1,1)-hlat/cp ! *(p00/p(iz,1))**akapa
+     :                *qc(iz+1,1))
+     :              -(th(iz-1,1)-hlat/cp !*(p00/p(iz,1))**akapa
+     :               *qc(iz-1,1)))
+     :              /(z(iz+1)-z(iz-1))/th(iz,1)
                else
                     xn=g*(th(iz+1,2)*(1.+0.61*qv(iz,2))
      :                 -th(iz-1,2)*(1.+0.61*qv(iz,2)))
@@ -86,6 +91,7 @@
          endif
 !--------Richardson number------------------!
         rich=min(ricr,xn/(def*def+zero))
+       ! if(z(iz).le.hbl) rich = -0.001
         ri(iz)=rich
 !-------------- mixing length---------------! 
         if (rich.gt.0.) then
@@ -105,10 +111,12 @@
         endif
            difk(iz) = mixl**2.*def*Fm
            dift(iz) = mixl_h**2.*def*Fh
+           dif_qc(iz) = dift(iz)
 !--------------limiters----------------------!
-!        if (xn/g*th(iz,2).gt.7.e-3.and.z(iz).lt.hbl) then
-!           dift(iz) = 0.
-!        endif
+        if (xn/g*th(iz,2).gt.7.e-3) then  
+           dift(iz) = 0.
+           dif_qc(iz) = 0.
+        endif
       enddo
 !---------------eddy diffusivities at lowest level------------! 
       if(Fv.le.0) then
@@ -133,8 +141,9 @@
       endif
 !-----------eddy diffusivities at half-levels-----------------!
       do iz = 2,nz
-         dift_hl(iz)=0.5*(dift(iz-1)+dift(iz))
-         difk_hl(iz)=0.5*(difk(iz-1)+difk(iz))
+         dift_hl(iz) = 0.5 * (dift(iz-1) + dift(iz))
+         difk_hl(iz) = 0.5 * (difk(iz-1) + difk(iz))
+         difq_hl(iz)= 0.5 * (dif_qc(iz-1) + dif_qc(iz))
       enddo
 !---------------------implicit scheme-------------------------!
       if (implicit) then
@@ -148,7 +157,7 @@
          call implicit_dif(F,qv(1:nz,1),dift_hl,ust_s*qst_s,difunqv2)
          if (ifwr.ne.0) then
             F(1:nz)=qc(1:nz,1)
-            call implicit_dif(F,qc(1:nz,1),dift_hl,0.,difunqc2)
+            call implicit_dif(F,qc(1:nz,1),difq_hl,0.,difunqc2)
             F(1:nz)=qr(1:nz,1)
             call implicit_dif(F,qr(1:nz,1),dift_hl,0.,difunqr2)
          endif
@@ -181,5 +190,23 @@
       difunqr(nz)=0.
       difunqci(nz)=0.
       difunqsn(nz)=0.
-
+!--------diagnostics of fluxes (needed because of implicit scheme)----!
+      if(mod(nstep*dt,3600.).eq.0) then
+         def13(1)=cdm*u(1,2) !surface flux of momentum
+         def23(1)=cdm*v(1,2)
+         h3(1)=ust_s*tst_s ! surface flux of heat
+         wq3(1)=ust_s*qst_s !surface flux of moisture
+         do iz = 2,nz
+            h3(iz)=(th(iz,1)-th(iz-1,1))/dz(iz)
+            h3(iz)=h3(iz)*dift_hl(iz)
+            wq3(iz)=(qv(iz,1)-qv(iz-1,1))/dz(iz)
+            wq3(iz)=wq3(iz)*dift_hl(iz)
+            wq3c(iz)=(qc(iz,1)-qc(iz-1,1))/dz(iz)
+            wq3c(iz)=wq3c(iz)*difq_hl(iz)
+            def13(iz)=(u(iz,1)-u(iz-1,1))/dz(iz)
+            def23(iz)=(v(iz,1)-v(iz-1,1))/dz(iz)
+            def13(iz)=def13(iz)*difk_hl(iz)   ! momentum flux
+            def23(iz)=def23(iz)*difk_hl(iz)
+         enddo
+      endif
       end

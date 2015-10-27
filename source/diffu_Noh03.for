@@ -5,7 +5,7 @@
      :                    cdm,h3e,def13c,def23c,difunqv,difunqc,difunqr,
      :                    qst_s,wq3,wq3c,wq3r,wq3_c,qc,qr,ifwr,cp,hlat,
      :                    t,p,dift2,difk2,dR,wq3e,dift3,difk3,ro,dtl,rad
-     :                    ,vat,wth_h,wth_h2,we,condensat,hlat,akapa,p00,
+     :                    ,vat,wth_h,wth_h2,we,condensat,akapa,p00,
      :                    the,tende,delta_th,delta_qv
       implicit none
       integer iz
@@ -22,7 +22,7 @@
       real, parameter:: b_0=6.5
       real, parameter:: b_hm=3.
       real*8, parameter:: b = 0.
-      real, parameter:: zero = 1.e-4
+      real, parameter:: zero = 1.e-8
       real, parameter:: B2 = 5.
       real, parameter:: A = 4.5
       real, parameter:: alpha = 3.
@@ -40,6 +40,7 @@
       dift2=0.
       dift3=0.
       difk3=0.
+      h3e=0.
 !--------virtual potential temperature---------------------            
       if(qif.gt.0) then
         thv=th(1,2)+0.61*th(1,2)*qv(1,2)
@@ -79,23 +80,25 @@
 !------------------------------------------------!
 !---------------matching K-profile with the entrainment flux------!
       do iz = 2,nz-1
-      if (z(iz).gt.hbl.and.z(iz-1).le.hbl) then
+      if (0.5*(z(iz)+z(iz+1)).gt.hbl
+     :       .and.0.5*(z(iz-1)+z(iz)).le.hbl) then
          dthv=th(iz,2)+th(iz,2)*(0.61*qv(iz,2)-qc(iz,2)
      :        )-th(iz-1,2)-th(iz-1,2)*(0.61*qv(iz-1,2)-qc(iz-1,2))
-         we= wth_h/dthv*100.
           Pr=1.+(Pr0-1.)*exp(-alpha*(z(iz-1)-eps*hbl)**2./hbl**2.)
          ws=(ust_s**3.+7.*karm*wstar**3.*z(iz-1)/hbl)**(1./3.) 
          eps2=hbl/z(iz-1)*
      :   (1.-sqrt(max(0.,-2.*Pr*(wth_h)*dz(iz)/
      :   (karm*ws*hbl*((dthv-gammah*dz(iz)))))))       
-         eps2=1. !min(1.,max(0.7,eps2))         
+         eps2=1. !min(1.,max(0.7,eps2)) 
+ !        h3e(iz) = -we*dthv
+ !        h3e(iz-1)= we*dthv
          endif
       enddo
 !-------------maximum mixing length (for use in Blackadar f-la)------!
        if(Fv.lt.0)then      ! stable stratification
          lmax=40.         
        else                          !  unstable stratification
-         lmax=300. !0.15*hbl
+         lmax=0.15*hbl
        endif
 !-------------------------------------------------------------------!
 !---------for use in local closure / or Prandtl number--------------!
@@ -152,11 +155,11 @@
             difk(iz)=0.
          endif
          if(0.5*(z(iz+2)+z(iz+1)).le.hbl.and.z(iz).ge.hbl*0.75) then
-           dift3(iz) = 0.85*karm*(dR*hbl*g/thv)**(1./3.)*
-     :               (z(iz)-hbl*0.5)**2.
-     :              /(hbl-hbl*0.5)*(1.-(z(iz)-hbl*0.5)
-     :              /(hbl-hbl*0.5))**0.5
-           difk3(iz) = 0.75*dift3(iz)
+ !          dift3(iz) = 0.85*karm*(dR*hbl*g/thv)**(1./3.)*
+ !    :               (z(iz)-hbl*0.5)**2.
+ !    :              /(hbl-hbl*0.5)*(1.-(z(iz)-hbl*0.5)
+ !    :              /(hbl-hbl*0.5))**0.5
+ !          difk3(iz) = 0.75*dift3(iz)
          else 
            dift3(iz)=0.
            difk3(iz)=0.
@@ -179,10 +182,10 @@
       rich=xn/(def*def+zero)
       if(-tst_s.le.0) then
           difk2(1)=mixl**2.*def*(max(b,(1.-5.*rich))**2.)
-	    dift2(1)=difk(1)
+	    dift2(1)=difk2(1)
 	else
 	  difk2(1)=karm*ws0*z_sl*(1.-z_sl/hbl)**2.
-        dift2(1)=difk(1)/Pr0
+        dift2(1)=difk2(1)/Pr0
       endif
 	
       do iz = 2,nz
@@ -221,19 +224,19 @@
       !      if (implicit) then
       do iz=1,nz-1
       F(iz)=th(iz,1)  +dtl/(0.5*dz(iz)+dz(iz+1))*
-     :        (gammah*(dift_hl2(iz)-dift_hl2(iz+1)))         ! right-hand side
+     :        (gammah*(dift_hl(iz)-dift_hl(iz+1))-h3e(iz))         ! right-hand side
       enddo
-      F(nz)=th(nz,1)+dtl/dz(nz)*gammah*dift_hl2(nz)
+      F(nz)=th(nz,1)+dtl/dz(nz)*gammah*dift_hl(nz)
       call implicit_dif(F,th(1:nz,1),dift_hl,ust_s*tst_s,difunt2)
       F(1:nz)=u(1:nz,1)
       call implicit_dif(F,u(1:nz,1),difk_hl,cdm*u(1,2),difunu2)
       F(1:nz)=v(1:nz,1)
       call implicit_dif(F,v(1:nz,1),difk_hl,cdm*v(1,2),difunv2)
       do iz=1,nz-1
-      F(iz)=qv(iz,1)+dtl/(0.5*dz(iz)+dz(iz+1))*
-     :        (gammaq*(dift_hl2(iz)-dift_hl2(iz+1)))         ! right-hand side
+      F(iz)=qv(iz,1)  +dtl/(0.5*dz(iz)+dz(iz+1))*
+     :        (gammaq*(dift_hl(iz)-dift_hl(iz+1)))         ! right-hand side
       enddo
-      F(nz)=qv(nz,1)+dtl/dz(nz)*gammaq*dift_hl2(nz)
+      F(nz)=qv(nz,1)! +dtl/dz(nz)*gammaq*dift_hl(nz)
       call implicit_dif(F,qv(1:nz,1),dift_hl,ust_s*qst_s,difunqv2)
       F(1:nz)=qc(1:nz,1)
       call implicit_dif(F,qc(1:nz,1),dift_hl3,0.,difunqc2)
@@ -351,7 +354,6 @@
       difunqv(1:nz)=difunqv2
       difunqc(1:nz)=difunqc2
       difunqr(1:nz)=difunqr2
-
 
       difunu(nz)=0.
       difunv(nz)=0.

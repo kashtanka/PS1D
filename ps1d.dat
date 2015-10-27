@@ -1,9 +1,15 @@
 ps1d
 ###############
-nz 180       # number of vertical grid points
-ztop 1800    # height of the domain top (meters)
-ntime 43200  # total time steps
-dt 1       # 
+nz 150       # number of vertical grid points
+ztop 1500    # height of the domain top (meters)
+ntime 288000  # total time steps
+dt 3.     #    time step (sec)
+##### sea ice / snow model parameters ##################
+nl 50 	      # number of levels in ice layer
+ice_h 0.5     # ice layer thickness (meters)
+nls 10        # number of levels in snow layer
+snow_h 0.15    # snow layer thickness (meters) (set to 0 if no snow)
+frac 0.95     # sea ice fraction
 #### vertical turbulent diffusion ###############
 # options for iodif:
 # 3 -  local (METRAS)
@@ -12,14 +18,16 @@ dt 1       #
 # 6 -  nonlocal + entrainment Noh et al. (2003) 
 # 7 -  nonlocal + entrainment Lock (2000)
 # 8 -  local (INM climate model)
+# 9 -  linear fluxes (mixed-layer model)
 #################################################
-iodif 6     #   turbulent diffusion (see options above)
+iodif 5     #   turbulent diffusion (see options above)
 implicit .true.  # implicit scheme for diffusion, otherwise expl scheme is used
-radif .false. # radiation
+radif .true. # radiation
 vadv .true.  # vertical advection
-tfix 1       # do not change this
-ifhle 1      # constant surface fluxes (1/0) 
-qif 1        # moisture on/off (1/0)
+tfix 0       # constant surface temperature
+ifhle 0      # constant surface fluxes (1/0)
+seaice 1     # sea ice model coupled to atm (1/0)
+qif 0        # moisture on/off (1/0)
 ifwr 0       # cloud water and rain on/off (1/0)
 ifmf 0       # cloud snow on/off (1/0)
 icetime 100    # specific for cold air outbreaks
@@ -27,7 +35,7 @@ icetime 100    # specific for cold air outbreaks
 pa 101780.   # pressure at the surface (Pa)
 ug  7.      # u-geostrophic
 vg  -5.5      # v-geostrophic
-phi 31.5     # latitude
+phi 70.5     # latitude
 ts 241.15     # surface temperature
 ###############
 #zgrid     # uncomment this to read the vertical grid from this file
@@ -41,11 +49,11 @@ ts 241.15     # surface temperature
 440
 540
 ##########
-inifile 0   # initial profiles: 1 - from file (see below), 0 - set in the code
+inifile 1   # initial profiles: 1 - from file (see below), 0 - set in the code
 ##########
 profile   #  theta u v q
 241    1       1       0       0
-7     7    7    7     # number of levels -1 in initial profs
+8    8    8    8     # number of levels -1 in initial profs
 
 0      241.15	   0	  7.	   0  	     -5.5	   0	   0
 132    244.1	   100	  7.	   100	     -5.5	   100	   0
@@ -54,6 +62,7 @@ profile   #  theta u v q
 600    254.2	   600	  7.	   600	     -5.5	   600	   0
 800    258.2	   800	  7.	   800	     -5.5	   800	   0
 1000   261.15	   1000	  7.	   1000	     -5.5	   1000	   0
+2000   271.15	   2000	  7.	   2000	     -5.5	   2000	   0
 ####################################################################
 iftf .false.
 ############

@@ -208,6 +208,9 @@
       if(allocated(dift)) deallocate(dift)
           allocate(dift(0:nz))
           dift=0.
+      if(allocated(dif_qc)) deallocate(dif_qc)
+          allocate(dif_qc(0:nz))
+          dif_qc=0.
       if(allocated(difk3)) deallocate(difk3)
           allocate(difk3(0:nz))
           difk3=0.
@@ -247,6 +250,18 @@
       if(allocated(h3)) deallocate(h3)
           allocate(h3(0:nz))
           h3=0.
+      if(allocated(fthl)) deallocate(fthl)
+          allocate(fthl(0:nz))
+          fthl=0.
+      if(allocated(fqt)) deallocate(fqt)
+          allocate(fqt(0:nz))
+          fqt=0.
+      if(allocated(HF)) deallocate(HF)
+          allocate(HF(0:nz))
+          HF=0.
+       if(allocated(HF2)) deallocate(HF2)
+          allocate(HF2(0:nz))
+          HF2=0.
       if(allocated(h3c)) deallocate(h3c)
           allocate(h3c(0:nz))
           h3c=0.
@@ -285,7 +300,8 @@
           mom=0.
       if(allocated(ug_bar)) deallocate(ug_bar)
           allocate(ug_bar(0:nz))
-          ug_bar=0.          
+          ug_bar=0.   
+      cond2=0.
       if(allocated(z)) goto 77
           allocate(z(0:nz))
           z=0.

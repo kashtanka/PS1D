@@ -1,5 +1,7 @@
       subroutine surf_layer_t
       use alloc_1d
+      use ice_mod, only:
+     : Tsi
       implicit none
       real*8 uvs,ta,qa,ps,z0,cdu,hflux,Elatent,
      : Ribulk,dzita,rhoa,z1,tau,water,tems,ustar,Tstar,
@@ -7,9 +9,14 @@
       real,external:: qsat
       integer i
       
-      water=1.
+      water=0.
       ta=th(1,2)
-      ts=292.5
+      if (seaice.eq.1) then
+         ts = Tsi
+	else
+		ts = 235.
+      endif
+ !     ts=235.
       z0=0.001
  !     ts = !241.15-dt*nstep/3600.*0.25
       
@@ -22,11 +29,11 @@
 !      goto 111
 !      endif
 !      enddo
- 111  continue
+! 111  continue
       th(0,3)=ts
       th(0,2)=ts
       th(0,1)=ts
-      
+           
       uvs=sqrt(u(1,2)**2.+v(1,2)**2.)
       ps=p(1,2)
       if (qif.ne.0) then
@@ -54,6 +61,40 @@
       h=hflux
       le=Elatent
       Fv=-ust_s*tst_s-0.61*t(1)*ust_s*qst_s
+      
+      if (frac.lt.1) then
+         water = 1
+         ts = 271.35
+         call surf_scheme3(water,
+     :       ta,ts,qa,
+     :       uvs,ps,z_sl,z0,
+     :       cdu,hflux,Elatent,ustar,qif,Ribulk,dzita,Tstar,rhoa,z1
+     :       ,tau,qstar)
+
+         cdm2 = cdu
+         ust_s2 = ustar
+         tst_s2 = Tstar
+         if (qif.ne.0) then
+            qst_s2 = qstar
+         else
+            qst_s2 = 0.
+         endif
+         dzits2 = dzita
+         h2 = hflux
+         le2 = Elatent
+         Fv2 = -ust_s2*tst_s2-0.61*t(1)*ust_s2*qst_s2
+       else
+          cdm2 = 0.
+          ust_s2 = 0.
+          tst_s2 = 0.
+          qst_s2 = 0.
+          dzits2 = 0.
+          h2 = 0.
+          le2 = 0.
+          Fv2 = 0.
+         
+       endif
+         
       end
       
       subroutine surf_scheme3(xsea,temp2,temp1,q2,uv2,p,z2,z0,cdu,hflux,
@@ -111,7 +152,7 @@
 	  paramz1=1
 	  endif
 	  conv=0
-	  param_uf=4
+	  param_uf=2
 	  metras=1
 	!-----------------------------------------------------------------------------!
 	  p00=1.e5
@@ -647,6 +688,8 @@
 	  tau=ro*ustar**2
 	  cdu=ustar**2/u2
 	  dzita=dzita2
+
+	!write(*,*) 'surf_layer',ustar,Tstar,dzita
 
 	  
 	  iter=0

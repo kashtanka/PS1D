@@ -1,11 +1,13 @@
       subroutine readpa(fnmap,fnfor,fnout
      :   ,itheta,iwind,scrout,fngrd,difloc,nonloc_tm86,
-     : nonloc_ls96,nonloc_noh03,loc_inm,nonloc_lock)
+     : nonloc_ls96,nonloc_noh03,loc_inm,nonloc_lock,
+     :  mixed_layer)
       use alloc_1d
+      use ice_mod
       implicit none
       logical scrout,dif3d,diftx
 	logical difloc,nonloc_tm86,nonloc_ls96,nonloc_noh03,
-     :          loc_inm,nonloc_lock
+     :          loc_inm,nonloc_lock,mixed_layer
       character*80 fnmap,fnfor,fext,fnout,fngrd
       character*80 line
       character*20 keyword,uppercase
@@ -24,7 +26,8 @@
       nonloc_ls96=.false.
       nonloc_noh03=.false.
       nonloc_lock=.false.
-      loc_inm=.false.  
+      loc_inm=.false.
+      mixed_layer=.false.
 
 
       do while(inperr.eq.0)
@@ -64,6 +67,21 @@ c
         elseif(keyword(1:nchark).eq.'nz') then
           read(27,*,iostat=inperr) nz
           write(*,*) 'nz=',nz
+        elseif(keyword(1:nchark).eq.'nl') then
+          read(27,*,iostat=inperr) nl
+          write(*,*) 'nl=',nl
+        elseif(keyword(1:nchark).eq.'ice_h') then
+          read(27,*,iostat=inperr) ice_h
+          write(*,*) 'ice_h=',ice_h
+        elseif(keyword(1:nchark).eq.'nls') then
+          read(27,*,iostat=inperr) nls
+          write(*,*) 'nls=',nls
+        elseif(keyword(1:nchark).eq.'snow_h') then
+          read(27,*,iostat=inperr) snow_h
+          write(*,*) 'snow_h=',snow_h
+        elseif(keyword(1:nchark).eq.'frac') then
+          read(27,*,iostat=inperr) frac
+          write(*,*) 'frac=',frac  
         elseif(keyword(1:nchark).eq.'dt') then
           read(27,*,iostat=inperr) dt
           write(*,*) 'dt=',dt
@@ -89,6 +107,7 @@ c
           if (iodif.eq.6) nonloc_noh03=.true.
           if (iodif.eq.7) nonloc_lock=.true.
           if (iodif.eq.8) loc_inm=.true.
+          if (iodif.eq.9) mixed_layer=.true.
         elseif(keyword(1:nchark).eq.'implicit') then
           read(27,*,iostat=inperr) implicit
           write(*,*) 'implicit=',implicit
@@ -127,6 +146,9 @@ c
         elseif(keyword(1:nchark).eq.'tfix') then
           read(27,*,iostat=inperr) tfix
           write(*,*) 'tfix=',tfix
+        elseif(keyword(1:nchark).eq.'seaice') then
+          read(27,*,iostat=inperr) seaice
+          write(*,*) 'seaice=',seaice
         elseif(keyword(1:nchark).eq.'qif') then
           read(27,*,iostat=inperr) qif
           write(*,*) 'qif=',qif

@@ -702,10 +702,10 @@ c------------------------------------------------------------------------------c
 	if (ifmf.ne.0) then
 	xMo=1.e-12
         do iz=1,nz
-	    if(qc(iz,2).ne.0.or.qci(iz,2).ne.0.) then
-	      qs(iz)=(qc(iz,2)*qsat(t(iz),p(iz,2))+
-     :	    qci(iz,2)*qsati(t(iz),p(iz,2)))
-     :      /(qc(iz,2)+qci(iz,2))
+	    if(qc(iz,3).ne.0.or.qci(iz,3).ne.0.) then
+	      qs(iz)=(qc(iz,3)*qsat(t(iz),p(iz,2))+
+     :	    qci(iz,3)*qsati(t(iz),p(iz,2)))
+     :      /(qc(iz,3)+qci(iz,3))
 	    else
 	     if(t(iz).le.273.15.and.t(iz).gt.233.15) then	
             CND=(t(iz)-Thom)/(Tfrz-Thom)

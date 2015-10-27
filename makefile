@@ -7,11 +7,14 @@ fc = ifort
 switch = -r8 -O3 -traceback
 obj = \
  $(obj_path)/alloc_1d_mod.o \
+ $(obj_path)/ice_mod.o \
+ $(obj_path)/ice.o \
  $(obj_path)/ps1d_main.o \
  $(obj_path)/readpa.o \
  $(obj_path)/vertical_grid.o \
  $(obj_path)/allocvar.o \
  $(obj_path)/iniprofs.o \
+ $(obj_path)/ini_ice.o \
  $(obj_path)/eq_state.o \
  $(obj_path)/radiation.o \
  $(obj_path)/moment.o \
@@ -22,6 +25,7 @@ obj = \
  $(obj_path)/aselyn.o \
  $(obj_path)/baroclinicity.o \
  $(obj_path)/surf_layer_t.o \
+ $(obj_path)/balance.o \
  $(obj_path)/const_fluxes.o \
  $(obj_path)/diffu_local.o \
  $(obj_path)/diffu_LS96.o \
@@ -29,6 +33,7 @@ obj = \
  $(obj_path)/diffu_TM86.o \
  $(obj_path)/diffu_INM.o \
  $(obj_path)/diffu_Lock.o \
+ $(obj_path)/diffu_ml.o \
  $(obj_path)/implicit_dif.o \
  $(obj_path)/progonka.o \
  $(obj_path)/microphysics.o \
@@ -44,8 +49,12 @@ $(exec) : $(obj)
 #MODULES:
 $(obj_path)/alloc_1d_mod.o : $(source_path)/alloc_1d_mod.for
 	cd $(obj_path)/ && $(fc) -c $(switch) $(source_path)/alloc_1d_mod.for && cd $(model_path)
+$(obj_path)/alloc_1d_mod.o : $(source_path)/ice_mod.f
+	cd $(obj_path)/ && $(fc) -c $(switch) $(source_path)/alloc_1d_mod.for && cd $(model_path)
 #OTHER SOURCE
 $(obj_path)/%.o : $(source_path)/%.for
+	cd $(obj_path)/ && $(fc) -c $(switch) $< && cd $(model_path)
+$(obj_path)/%.o : $(source_path)/%.f
 	cd $(obj_path)/ && $(fc) -c $(switch) $< && cd $(model_path)
 clean :
 	rm $(obj) $(exec)
