@@ -18,10 +18,12 @@
       real(kind(0.d0)):: ablv,dy,p0,dpdy_d,phi,ptop,bl_dpdy
       real(kind(0.d0)):: cond_heat,mth,mqv,mqc,mqr,mqci,mqsn
       real(kind(0.d0)):: frac
+      real(kind(0.d0)):: gabls_tim(37),gabls_ts(37)
       parameter(r=287.05,cp=1005.,g=9.8066,akapa=r/cp,p00=1.e5,
      :          omega=7.2921e-5,pi=3.141593,hlat=2.501e6,
      :          hsub=2.837e6,hfus=3.336e5)
-      logical implicit,radif,vadv,iftf
+      logical implicit,vadv,iftf
+      integer rad_par
       real*8,allocatable,dimension(:)::
      :   thdat,usdat,vsdat,qvsdat,thl
      :   ,zthdat,zusdat,zvsdat,zqvsdat,psdat,ptdat,pressdat

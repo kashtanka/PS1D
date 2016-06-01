@@ -12,6 +12,8 @@
       C1=g*(z(iz+1)-z(iz))*0.5*p00**akapa/r/(0.5*(th(iz+1,2)+th(iz,2))) 
       C2=p(iz+1,2)
       pm=p(iz+1,2)-1000.                        !first guess
+!      write(0,*) pm
+!      stop
       F=pm-C1*pm**(1.-akapa)-C2                 ! function value with first guess
       Fwt=1.-C1*(1.-akapa)*pm**(-akapa)         ! derivative value with first guess
       !-----iteration------------!
@@ -23,6 +25,7 @@
       p(iz,2)=2.*pm-p(iz+1,2)
       !write(0,*)z(iz), p(iz,2)
       enddo
+      !stop
       
       !---------------------------------------------------!
       

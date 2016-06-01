@@ -1,4 +1,4 @@
-      program nh1d
+      program ps1d
       use alloc_1d
       implicit real*8 (a-h,o-z)
       logical scrout
@@ -30,6 +30,9 @@
       fileice = './results/exp/ice000.txt'
 !---- allocate variables   
       call allocvar
+      if (rad_par.eq.2) then
+         call alloc_goddard
+      endif
       call vertical_grid
       call iniprofs         ! initial profs interpolated on model grid
       if (seaice.eq.1) call ini_ice
@@ -101,7 +104,7 @@
 
       !-----------------------------------------!
     !  call baroclinity         
-      if (radif) then
+      if (rad_par.ne.0) then
          call radiation   ! rad fluxes and tendencies
       endif  
       if (vadv) then
@@ -178,5 +181,5 @@
            
 9000  continue
       
-      end program nh1d
+      end program ps1d
       

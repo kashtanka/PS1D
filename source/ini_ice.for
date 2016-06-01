@@ -25,12 +25,12 @@
       Tb = 271.15  ! sea ice bottom temperature
 
       do iz = 1, nl
-         Ti(iz) = 245. + iz*dzi*(Tb-245.)/ice_h
+         Ti(iz) = 256. + iz*dzi*(Tb-256.)/ice_h
       enddo
 
       if (snow_h.gt.0) then
          do iz = 1,nls
-            Tsn(iz) = 245.
+            Tsn(iz) = 256.
          enddo
       endif
 

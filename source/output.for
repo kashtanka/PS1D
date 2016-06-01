@@ -82,7 +82,7 @@
          open(20,file=fileprof) 
          open(21,file=fileturb)
          open(22,file=filewater)
-         open(23,file=fileice)
+         if(seaice.eq.1) open(23,file=fileice)
          do iz=0,nz
            if(iz.eq.0) height=z(0)
            if(iz.gt.0) height=z(iz)-z_sl
@@ -98,7 +98,7 @@
               dqsdz2 = 0
               dqsdz3 = 0
            endif
-              write(20,'(f5.0,5f10.4,f10.6,3f14.5,f12.6,2f12.5,3f15.9,
+              write(20,'(f7.2,5f10.4,f10.6,3f14.5,f12.6,2f12.5,3f15.9,
      :                   f12.6,f12.4)')
      :        height, u(iz,3),v(iz,3),
      :        sqrt(u(iz,3)**2.+v(iz,3)**2),th(iz,3),
@@ -107,7 +107,7 @@
      :        difunt(iz),
      :        dqsdz2,dqsdz3,t(iz),p(iz,2) !,sqrt((ug+dpdy(iz)/fcor)**2+vgeos(iz)**2)
 !------------------------ MICROPHYSICS---------------------------------!
-              write(22,'(f5.0,8f12.8,3f13.9)')
+              write(22,'(f7.2,8f12.8,3f13.9)')
      :        height,qv(iz,3),qsat(t(iz),p(iz,2)),qsati(t(iz),p(iz,2)),
      :        qs(iz),qc(iz,2),qr(iz,2),qci(iz,2),qsn(iz,2)
      :        ,hlat/cp*(p00/p(iz,2))**akapa*condensat(iz)
@@ -142,7 +142,7 @@
            xBf = (xp/p00)**akapa*
      :           (1.+0.61*0.5*(qv(iz,3)+qv(iz-1,3)-qc(iz,3)-qc(iz-1,3)))
      :  *(-h3(iz)) - 0.5*(th(iz,3)+th(iz-1,3))*(0.61*wq3(iz) - wq3c(iz))
-           write(21,'(f5.0,4f10.4,f13.8,f10.4,2f10.4,2f13.8,f10.4,
+           write(21,'(f7.2,4f10.4,f13.8,f10.4,2f10.4,2f13.8,f10.4,
      :                 2f13.8)') 
      :     0.5*(z(iz-1)+z(iz))-z_sl*0.5,
      :     ht(iz),mom(iz),def13(iz)+def13c(iz),def23(iz)+def23c(iz),
@@ -152,6 +152,7 @@
          enddo
 !----------------------------------------------------------------------!
 !---------------------ICE----------------------------------------------!
+         if (seaice.eq.1) then
          if (snow_h.gt.0) then
             do iz = 1,nls
                write(23,'(f10.3,f10.2)') iz*dzs-0.5*dzs, Tsn(iz)
@@ -164,10 +165,11 @@
                write(23,'(f10.3,f10.2)') iz*dzi-0.5*dzi, Ti(iz)
             enddo
          endif
+         close(23)
+         endif
          close(20)
          close(21)
          close(22)
-         close(23)
       endif
       !-------------------------------------------------------------!
       

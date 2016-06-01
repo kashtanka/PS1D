@@ -14,10 +14,25 @@
       if (seaice.eq.1) then
          ts = Tsi
 	else
-		ts = 235.
+           do i = 1,36
+              if (nstep*dt.ge.gabls_tim(i).and.
+     :           nstep*dt.lt.gabls_tim(i+1)) then
+                 ts = gabls_ts(i) + (nstep*dt-gabls_tim(i))/3600.*
+     :                (gabls_ts(i+1) - gabls_ts(i))
+              endif
+           enddo
+!          if(dt*nstep.lt.3600*icetime) then
+!             ts = 250.
+!             water = 0.
+!          else
+!             ts = 273.15
+!             water = 1.
+!          endif
+           
       endif
+      write(0,*) 'ts = ',ts
  !     ts=235.
-      z0=0.001
+      z0=0.01
  !     ts = !241.15-dt*nstep/3600.*0.25
       
 !      do i = 1,100
@@ -30,9 +45,9 @@
 !      endif
 !      enddo
 ! 111  continue
-      th(0,3)=ts
-      th(0,2)=ts
-      th(0,1)=ts
+      th(0,3)=ts*(p00/p(1,2))**0.286
+      th(0,2)=ts*(p00/p(1,2))**0.286
+      th(0,1)=ts*(p00/p(1,2))**0.286
            
       uvs=sqrt(u(1,2)**2.+v(1,2)**2.)
       ps=p(1,2)
@@ -62,7 +77,7 @@
       le=Elatent
       Fv=-ust_s*tst_s-0.61*t(1)*ust_s*qst_s
       
-      if (frac.lt.1) then
+      if (seaice.eq.1.and.frac.lt.1) then
          water = 1
          ts = 271.35
          call surf_scheme3(water,
@@ -148,11 +163,11 @@
 	  paramzt=5
 	  paramz1=2
 	  else
-	  paramzt=5
+	  paramzt=0
 	  paramz1=1
 	  endif
 	  conv=0
-	  param_uf=2
+	  param_uf=2.
 	  metras=1
 	!-----------------------------------------------------------------------------!
 	  p00=1.e5
@@ -199,7 +214,7 @@
 	  bMag=bMagi
 	  endif
 	  
-!	  t1=t1*(p00/p)**0.286      ! t1 - fixed real surface temperature (T) being
+	  t1=t1*(p00/p)**0.286      ! t1 - fixed real surface temperature (T) being
 	                            ! converted into potential temperature (theta)
 !	  t2=t2**(p00/p)**0.286
         esat1= 610.7*10.**(aMag*(t1-273.15)/(bMag+(t1-273.15)))
@@ -228,7 +243,7 @@
 	  if(dT+0.61*dq*Tsr.le.0.) strat=2     
         !-----------------------------------------!
 	if (strat.eq.1) then   
-	  L=1000.    
+	  L=10000.    
 20	  iter=iter+1
         dzita2=z2/L
 	  dzita1=z1/L
@@ -256,6 +271,8 @@
 	 else if(param_uf==4) then
 	   unifU1=-5.*dzita1
 	   unifU2=-5.*dzita2
+!           write(0,*) unifU2
+      
 	 else if(param_uf==5) then
 	   unifU1=-(3.*dzita1**(5./6.))
 	   unifU2=-(3.*dzita2**(5./6.))
@@ -346,22 +363,22 @@
 	  Tstar=(k)*dT/(dlog(z2/zt)-unifT2+unifT1)
 	  qstar=k*dq/(dlog(z2/zt)-unifq2+unifq1)
 	  Lit=ustar**2/(k*g*(Tstar+0.61*Tsr*qstar))*Tsr
-	  Lit = sign(1.,Lit)*max(abs(Lit),1.e-3) 
+	  Lit = sign(1.,Lit)*max(abs(Lit),1.e-7) 
 	  dL=dabs(L-Lit)
 
-	  if (iter.gt.10) goto 33
+	  if (iter.gt.25) goto 33
 	  
 	  if (dL.lt.5) then
 	     if(L.gt.z2) then
-		 if(dL.lt.1) goto 33
-		    L=(Lit+L)/2.
-		 else
-		    if(dL.lt.0.2) goto 33
-		    L=Lit
-		 endif
-              endif
+                if(dL.lt.1) goto 33
+                L= (Lit+L)/2.
+             else
+                if(dL.lt.0.00001) goto 33
+                L=Lit
+             endif
+          endif
 	  if(iter.gt.1) then
-	     L=(Lit+L)/2.
+	     L= (Lit+L)/2.
 	  else
 	     L=Lit
 	  endif
@@ -689,7 +706,7 @@
 	  cdu=ustar**2/u2
 	  dzita=dzita2
 
-	!write(*,*) 'surf_layer',ustar,Tstar,dzita
+!	write(*,*) 'surf_layer',dzita,dT
 
 	  
 	  iter=0

@@ -47,7 +47,7 @@
       endif
       enddo
 30    continue
-      if (frac.lt.1) then
+      if (seaice.eq.1.and.frac.lt.1) then
          surf_flux = frac*ust_s*tst_s + (1.-frac)*ust_s2*tst_s2
       else
          surf_flux = ust_s*tst_s
@@ -118,7 +118,7 @@
       
       
      
-50    hbl=hbl2 !hbl4   !max(hbl3,hbl1)
+50    hbl=hbl1 !hbl4   !max(hbl3,hbl1)
  !     write(0,*) hbl,zi_rec
 
  !     if (nstep.eq.1) then

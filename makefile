@@ -8,6 +8,9 @@ switch = -r8 -O3 -traceback
 obj = \
  $(obj_path)/alloc_1d_mod.o \
  $(obj_path)/ice_mod.o \
+ $(obj_path)/goddard_mod.o \
+ $(obj_path)/alloc_goddard.o \
+ $(obj_path)/cliradlw.o \
  $(obj_path)/ice.o \
  $(obj_path)/ps1d_main.o \
  $(obj_path)/readpa.o \

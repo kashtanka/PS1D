@@ -1,0 +1,22 @@
+'surface temperature and near surface air temperature'
+'high accuracy options .true. or  .false.'
+.false.
+'trace gases option: true , false  '
+.false.
+'options for aerosols'
+.false.
+'options for vegetation canopy'
+.false.
+'set overcast=.true. if cloud fractional cover can only be either 0 or 1'
+.false.
+'specify either cloud optical thickness or cloud water/ice'
+.false.
+'co2  n2o   ch4    cfc11    cfc12    cfc22'
+300.e-6  0.28e-6  1.75e-6  0.3e-9  0.5e-9  0.2e-9      
+'fs(1,1)  fs(1,2)'
+'eg(1,1,1) ev(1,1,1)  rv(1,1,1)'
+1.0  1.0  0.0
+'standard model'
+'TRA.d'
+'cloud optical depth'
+'cloud cover'

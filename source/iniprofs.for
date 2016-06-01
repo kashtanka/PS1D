@@ -4,6 +4,7 @@
       integer iz,id,it
       real dtd,dzd,dvd,dud,dqd,height,dtfc
       real*8 F, Fwt,pm,C1,C2,DIV
+      real dzz,dtt,u1,u2
       real,external:: qsat
       do id=0,ndat-1
       dtd=thdat(id+1)-thdat(id)
@@ -96,27 +97,44 @@
       !    Newton method is used for iteration
       
       p(1,2)=pa   !known value
-      do iz=1,nz-1
-      C1=g*(z(iz+1)-z(iz))*0.5*p00**akapa/r/(0.5*(th(iz+1,2)+th(iz,2))) !constant during iteration at this z-level
-      C2=p(iz,2)                                                  !constant during iteration at this z-level
+      write(0,*) p(1,2)
+      do iz = 2,nz
+         dzz = z(iz)-z(iz-1)
+         dtt = th(iz,2) - th(iz-1,2)
+         u2 = th(iz,2)
+         u1 = th(iz-1,2)
+         if( dtt.ne.0) then
+         p(iz,2) = p(iz-1,2)**akapa - g*akapa*p00**akapa/r*dzz/dtt*
+     :        (log(u2)-log(u1))
+         else
+          p(iz,2) = p(iz-1,2)**akapa - g*akapa*p00**akapa/r*dzz
+     :        /th(iz-1,2)  
+         endif
+         p(iz,2) = p(iz,2)**(1./akapa)
+!         write(0,*) 'dzz=','dtt=',dzz,dtt,th(iz,2)
+
+!      do iz=1,nz-1
+!      C1=g*(z(iz+1)-z(iz))
+!     :    0.5*p00**akapa/r/(0.5*(th(iz+1,2)+th(iz,2))) !constant during iteration at this z-level
+!      C2=p(iz,2)                                                  !constant during iteration at this z-level
       
-      pm=p(iz,2)-1000.                                          !first guess
-      F=pm+C1*pm**(1.-akapa)-C2                                 ! function value with first guess
-      Fwt=1.+C1*(1.-akapa)*pm**(-akapa)                         ! derivative value with first guess
+!      pm=p(iz,2)-1000.                                          !first guess
+!      F=pm+C1*pm**(1.-akapa)-C2                                 ! function value with first guess
+!      Fwt=1.+C1*(1.-akapa)*pm**(-akapa)                         ! derivative value with first guess
       !-----iteration------------!
-      do it=1,4
-      pm=pm-F/Fwt
-      F=pm+C1*pm**(1.-akapa)-C2
-      Fwt=1.+C1*(1.-akapa)*pm**(-akapa)
-      end do
-      p(iz+1,2)=2.*pm-p(iz,2)
-      write(0,*) z(iz),p(iz,2)
+!      do it=1,10
+!      pm=pm-F/Fwt
+!      F=pm+C1*pm**(1.-akapa)-C2
+!      Fwt=1.+C1*(1.-akapa)*pm**(-akapa)
+!      end do
+!      p(iz+1,2)=2.*pm-p(iz,2)
       enddo
       p(:,1)=p(:,2)
       ptop=p(nz,2)
       
       do iz =1,nz
       t(iz)=th(iz,2)*(p(iz,2)/p00)**akapa
+      write(0,*) z(iz),p(iz,2),t(iz)
 !      if (qif.ne.0) then
 !      qv(iz,1)=0.4*qsat(t(iz),p(iz,1))
 !      qv(iz,2)=0.4*qsat(t(iz),p(iz,1))

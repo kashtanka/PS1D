@@ -10,6 +10,7 @@
       real*8 F(1:nz),dift_hl(1:nz),difk_hl(1:nz)
       real*8 difunt2(1:nz),difunu2(1:nz),difunv2(1:nz),
      : difunqv2(1:nz),difunqc2(1:nz),difunqr2(1:nz)
+      real*8 difk_st,f_ri
       dift_hl=0.
       difk_hl=0.
       gammah_hl=0.
@@ -18,7 +19,7 @@
       gammaq=0.
       karm=0.4
       zero=1.e-9
-      b=0.00
+      b=0.
       if(qif.gt.0) then
          thv=th(1,2)+0.61*th(1,2)*qv(1,2)
       else
@@ -73,78 +74,57 @@
 
 !        xn=g*(th(iz+1,2)-th(iz-1,2))/(z(iz+1)-z(iz-1))/th(iz,2)
         rich=xn/(def*def+zero)
-        
-        if (Fv.le.0) then !(Fv(ix,iy).le.0) then
-	      if(rich.ge.0) then
-	 !       if(rich.le.0.2) then
-                difk(iz)=mixl**2.*def*(max(b,(1.-5.*rich))**2)
-	          dift(iz)=difk(iz)
-       !           write(0,*) z(iz),dift(iz),difk(iz)
-	 !       else
-	  !        difk(iz)=mixl**2*def*b
-	 !         dift(iz)=difk(iz)
-	 !       endif  
-	      else
-	        difk(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
-	        dift(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
-	      endif
-	    else
-
-	    if(z(iz).gt.hbl) then
-	
-	      if(rich.ge.0) then
-	        if(rich.le.0.2) then
-                difk(iz)=mixl**2*def*(max(b,(1.-5.*rich))**2)
-	          dift(iz)=difk(iz)
-	        else
-	          difk(iz)=mixl**2*def*b
-	          dift(iz)=difk(iz)
-	        endif  
-	      else
-	        difk(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
-	        dift(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
-	      endif
-	    
-	    else      
-	
+!        f_ri = (1.+5.*rich+44.*rich**2.)**(-2.) !(max(0. , 1.-5.*rich))**2.
+        !difk_st =  mixl**2.*def*f_ri !max(b,f_ri)
+        f_ri = (max(0. , 1.-5.*rich))**2.
+        difk_st = mixl**2.*def*max(b,f_ri)
+        if (Fv.le.0) then       !(Fv(ix,iy).le.0) then
            if(rich.ge.0) then
-	        if(rich.le.0.2) then
-                difk2(iz)=mixl**2*def*(max(b,(1.-5.*rich))**2)
-	          dift2(iz)=difk2(iz)
-	        else
-	          difk2(iz)=mixl**2*def*b
-	          dift2(iz)=difk2(iz)
-	        endif  
-	      else
-	        difk2(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
-	        dift2(iz)=difk2(iz)*(min(3.,(1.-16.*rich)**0.25))
- 
-	      endif
-     
-	dift(iz)=karm*ust_s*z_sl/((1-16.*dzits)**(-0.5)
-     :        -karm*z_sl/tst_s*gammah_s)*
-     :        ((hbl-z(iz))/(hbl-z_sl))**2.*
-     :        (ust_s*karm*z(iz)+wstar*hbl*
-     :        (z(iz)/hbl)**(4./3.))/(ust_s*karm*z_sl+
-     :        wstar*hbl*(z_sl/hbl)**(4./3.))
-     
-	difk(iz)=dift(iz)*((1-16.*dzits)**(-0.25)+b_hm*wstar*
-     :        ust_s*karm*z_sl/hbl
-     :        /((1-16.*dzits)**(-0.25))/w_2s)  
-
+              difk(iz) = difk_st
+              dift(iz)=difk(iz)
+           else
+              difk(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
+              dift(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
+           endif
+        else
+           if(z(iz).gt.hbl) then
+              if(rich.ge.0) then
+                 difk(iz)=difk_st
+                 dift(iz)=difk(iz)
+              else
+                 difk(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
+                 dift(iz)=difk(iz)*(min(3.,(1.-16.*rich)**0.25))
+              endif
+           else      
+              if(rich.ge.0) then
+                 difk2(iz) = difk_st
+                 dift2(iz) = difk2(iz)
+              else
+                 difk2(iz)=mixl**2*def*(min(9.,sqrt(1.-16.*rich)))
+                 dift2(iz)=difk2(iz)*(min(3.,(1.-16.*rich)**0.25))
+              endif
+               
+              dift(iz)=karm*ust_s*z_sl/((1-16.*dzits)**(-0.5)
+     :             -karm*z_sl/tst_s*gammah_s)*
+     :             ((hbl-z(iz))/(hbl-z_sl))**2.*
+     :             (ust_s*karm*z(iz)+wstar*hbl*
+     :             (z(iz)/hbl)**(4./3.))/(ust_s*karm*z_sl+
+     :             wstar*hbl*(z_sl/hbl)**(4./3.))
+               
+              difk(iz)=dift(iz)*((1-16.*dzits)**(-0.25)+b_hm*wstar*
+     :             ust_s*karm*z_sl/hbl
+     :             /((1-16.*dzits)**(-0.25))/w_2s)  
          
-           dift3(iz)=0.85*karm*(min(1.,dR*hbl))**(1./3.)*(z(iz)-0)**2.
-     :              /(hbl-0)*(1.-(z(iz)-0)/(hbl-0))**0.5
-           difk3(iz)=0.75*dift3(iz)
-         !  write(0,*) dift3(iz),dift(iz),(dR*hbl)**(1./3.)
+              dift3(iz)=0.85*karm*(min(1.,dR*hbl))**(1./3.)*(z(iz)-0)**2.
+     :             /(hbl-0)*(1.-(z(iz)-0)/(hbl-0))**0.5
+              difk3(iz)=0.75*dift3(iz)
           
-
-	dift(iz)=max(dift(iz),dift2(iz))
-	difk(iz)=max(difk(iz),difk2(iz))
-
-	    endif
-	    endif	
-	enddo    
+              dift(iz)=max(dift(iz),dift2(iz))
+              difk(iz)=max(difk(iz),difk2(iz))
+           endif
+        endif
+      
+      enddo    
 	
 	if(-tst_s.le.0) then
       dudz=(1.+5.*dzits)*ust_s/(karm*z_sl)
@@ -203,21 +183,21 @@
      :         -gammah_hl(iz+1)*dift_hl(iz+1))         ! right-hand side
       enddo
       F(nz)=th(nz,1)+dtl/dz(nz)*gammah_hl(nz)*dift_hl(nz)
-      if (frac.lt.1) then
+      if (seaice.eq.1.and.frac.lt.1) then
          surf_flux = frac*ust_s*tst_s + (1.-frac)*ust_s2*tst_s2
       else
          surf_flux = ust_s*tst_s
       endif
       call implicit_dif(F,th(1:nz,1),dift_hl,surf_flux,difunt2)
       F(1:nz)=u(1:nz,1)
-      if (frac.lt.1) then
+      if (seaice.eq.1.and.frac.lt.1) then
          surf_flux = u(1,2)*(frac*cdm + (1.-frac)*cdm2)
       else
          surf_flux = cdm*u(1,2)
       endif
       call implicit_dif(F,u(1:nz,1),difk_hl,surf_flux,difunu2)
       F(1:nz)=v(1:nz,1)
-      if (frac.lt.1) then
+      if (seaice.eq.1.and.frac.lt.1) then
          surf_flux = v(1,2)*(frac*cdm + (1.-frac)*cdm2)
       else
          surf_flux = cdm*v(1,2)
@@ -229,7 +209,7 @@
      :         -gammaq_hl(iz+1)*dift_hl(iz+1))         ! right-hand side
       enddo
       F(nz)=qv(nz,1)+dtl/dz(nz)*gammaq_hl(nz)*dift_hl(nz)
-      if (frac.lt.1) then
+      if (seaice.eq.1.and.frac.lt.1) then
          surf_flux = frac*ust_s*qst_s + (1.-frac)*ust_s2*qst_s2
       else
          surf_flux = ust_s*qst_s

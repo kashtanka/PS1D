@@ -114,9 +114,9 @@ c
         elseif(keyword(1:nchark).eq.'inifile') then
           read(27,*,iostat=inperr) inifile
           write(*,*) 'inifile=',inifile
-        elseif(keyword(1:nchark).eq.'radif') then
-          read(27,*,iostat=inperr) radif
-          write(*,*) 'radif=',radif
+        elseif(keyword(1:nchark).eq.'rad_par') then
+          read(27,*,iostat=inperr) rad_par
+          write(*,*) 'rad_par=',rad_par
           elseif(keyword(1:nchark).eq.'iftf') then
           read(27,*,iostat=inperr) iftf
           write(*,*) 'iftf=',iftf
@@ -165,11 +165,13 @@ c
           call allocref
           do ii=0,ndat
             read (29,*,iostat=inperr) zthdat(ii),thdat(ii)
-     :        ,zusdat(ii),usdat(ii)
-     :        ,zvsdat(ii),vsdat(ii)
-     :        ,zvsdat(ii),qvsdat(ii)
-            write(0,*)'thdat',ii,thdat(ii)
+     :        ,usdat(ii)
+     :        ,vsdat(ii)
+     :        ,qvsdat(ii)
+            write(0,*)'thdat',ii,thdat(ii)      
           enddo
+             zusdat=zthdat
+            zvsdat=zthdat
           dzpro=zthdat(ndat)/npro
           pressdat(0)=pa
           write(*,*) 'Profile given'
@@ -182,6 +184,13 @@ c
            
         endif
         enddo
+
+        open(31,file='GABLS4_stage3_Tg.txt')
+        do i = 1,37
+           read(31,*) gabls_tim(i),gabls_ts(i)
+           write(0,*) gabls_tim(i),gabls_ts(i)
+        enddo
+        close(31)
       end subroutine readpa
       
       subroutine allocref
