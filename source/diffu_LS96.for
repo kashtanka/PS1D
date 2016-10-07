@@ -74,11 +74,11 @@
 
 !        xn=g*(th(iz+1,2)-th(iz-1,2))/(z(iz+1)-z(iz-1))/th(iz,2)
         rich=xn/(def*def+zero)
-!        f_ri = (1.+5.*rich+44.*rich**2.)**(-2.) !(max(0. , 1.-5.*rich))**2.
-        !difk_st =  mixl**2.*def*f_ri !max(b,f_ri)
-        f_ri = (max(0. , 1.-5.*rich))**2.
-        difk_st = mixl**2.*def*max(b,f_ri)
-        if (Fv.le.0) then       !(Fv(ix,iy).le.0) then
+        f_ri = (1.+5.*rich+44.*rich**2.)**(-2.) !(max(0. , 1.-5.*rich))**2.
+        difk_st =  mixl**2.*def*f_ri !max(b,f_ri)
+!        f_ri = (max(0. , 1.-5.*rich))**2.
+ !       difk_st = mixl**2.*def*max(b,f_ri)
+        if (Fv.le.0) then 
            if(rich.ge.0) then
               difk(iz) = difk_st
               dift(iz)=difk(iz)
@@ -119,8 +119,8 @@
      :             /(hbl-0)*(1.-(z(iz)-0)/(hbl-0))**0.5
               difk3(iz)=0.75*dift3(iz)
           
-              dift(iz)=max(dift(iz),dift2(iz))
-              difk(iz)=max(difk(iz),difk2(iz))
+              dift(iz) = max(dift(iz),dift2(iz))
+              difk(iz) = max(difk(iz),difk2(iz))
            endif
         endif
       

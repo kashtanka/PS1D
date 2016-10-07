@@ -5,7 +5,7 @@
       real dtd,dzd,dvd,dud,dqd,height,dtfc
       real*8 F, Fwt,pm,C1,C2,DIV
       real dzz,dtt,u1,u2
-      real,external:: qsat
+      real,external:: qsati
       do id=0,ndat-1
       dtd=thdat(id+1)-thdat(id)
       dzd=zthdat(id+1)-zthdat(id)
@@ -135,11 +135,11 @@
       do iz =1,nz
       t(iz)=th(iz,2)*(p(iz,2)/p00)**akapa
       write(0,*) z(iz),p(iz,2),t(iz)
-!      if (qif.ne.0) then
-!      qv(iz,1)=0.4*qsat(t(iz),p(iz,1))
-!      qv(iz,2)=0.4*qsat(t(iz),p(iz,1))
-!      qv(iz,3)=0.4*qsat(t(iz),p(iz,1))
-!      endif
+      !if (qif.ne.0) then
+      qv(iz,1)=0.3*qsati(t(iz),p(iz,1))
+      qv(iz,2)=0.3*qsati(t(iz),p(iz,1))
+      qv(iz,3)=0.3*qsati(t(iz),p(iz,1))
+      !endif
       !vgeos(iz)=z(iz)/z(nz)*vg
       !v(iz,1)=vgeos(iz)
       !v(iz,2)=vgeos(iz)

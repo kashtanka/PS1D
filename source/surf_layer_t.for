@@ -14,13 +14,14 @@
       if (seaice.eq.1) then
          ts = Tsi
 	else
-           do i = 1,36
-              if (nstep*dt.ge.gabls_tim(i).and.
-     :           nstep*dt.lt.gabls_tim(i+1)) then
-                 ts = gabls_ts(i) + (nstep*dt-gabls_tim(i))/3600.*
-     :                (gabls_ts(i+1) - gabls_ts(i))
-              endif
-           enddo
+!           ts=290.
+!           do i = 1,36
+!              if (nstep*dt.ge.gabls_tim(i).and.
+!     :           nstep*dt.lt.gabls_tim(i+1)) then
+!                 ts = gabls_ts(i) + (nstep*dt-gabls_tim(i))/3600.*
+!     :                (gabls_ts(i+1) - gabls_ts(i))
+!              endif
+!           enddo
 !          if(dt*nstep.lt.3600*icetime) then
 !             ts = 250.
 !             water = 0.
@@ -30,10 +31,22 @@
 !          endif
            
       endif
-      write(0,*) 'ts = ',ts
+      
  !     ts=235.
-      z0=0.01
- !     ts = !241.15-dt*nstep/3600.*0.25
+      z0=0.001
+!      if(dt*nstep.lt.3600*40) then
+!      z0=0.0185*(max(ust_s,1.e-6))**2./g
+!      ts=290.
+!      elseif(dt*nstep.ge.3600*40.and.dt*nstep.lt.3600*(40.+1./60.)) then
+!      z0=0.0185*(max(ust_s,1.e-6))**2./g/2.
+!      ts = 289.5
+!      elseif(dt*nstep.ge.3600*(40.+1./60.)) then
+!      z0=0.0185*(max(ust_s,1.e-6))**2./g
+!      ts = 290.
+!      endif
+!      water=0.
+ !     ts = 290. !+dt*nstep/3600.*0.15
+!      write(0,*) 'ts = ',ts
       
 !      do i = 1,100
 !      if(dt*nstep.gt.3600*12.and.dt*nstep.gt.3600.*icetime*i.and.
@@ -45,9 +58,9 @@
 !      endif
 !      enddo
 ! 111  continue
-      th(0,3)=ts*(p00/p(1,2))**0.286
-      th(0,2)=ts*(p00/p(1,2))**0.286
-      th(0,1)=ts*(p00/p(1,2))**0.286
+      th(0,3)=ts !*(p00/p(1,2))**0.286
+      th(0,2)=ts !*(p00/p(1,2))**0.286
+      th(0,1)=ts !*(p00/p(1,2))**0.286
            
       uvs=sqrt(u(1,2)**2.+v(1,2)**2.)
       ps=p(1,2)
@@ -163,11 +176,11 @@
 	  paramzt=5
 	  paramz1=2
 	  else
-	  paramzt=0
+	  paramzt=5
 	  paramz1=1
 	  endif
 	  conv=0
-	  param_uf=2.
+	  param_uf=1.
 	  metras=1
 	!-----------------------------------------------------------------------------!
 	  p00=1.e5
@@ -214,7 +227,7 @@
 	  bMag=bMagi
 	  endif
 	  
-	  t1=t1*(p00/p)**0.286      ! t1 - fixed real surface temperature (T) being
+!	  t1=t1*(p00/p)**0.286      ! t1 - fixed real surface temperature (T) being
 	                            ! converted into potential temperature (theta)
 !	  t2=t2**(p00/p)**0.286
         esat1= 610.7*10.**(aMag*(t1-273.15)/(bMag+(t1-273.15)))

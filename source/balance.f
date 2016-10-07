@@ -51,11 +51,18 @@
          Ch = - tst_s*ust_s/(uvs*(Tsi-th(1,2)))
          A = eps*sig
          B = ro(1)*cp*Ch*uvs + K_th/(0.5*dz)
+!         if (hr.le.6) then
          C = -ro(1)*cp*Ch*th(1,2)*uvs - K_th/(0.5*dz)*T1 - (aKL+bKL*nn
      :       **3)*eps*sig*(th(1,2))**4
+!         else
+!         C = -ro(1)*cp*Ch*th(1,2)*uvs - K_th/(0.5*dz)*T1 - 150 
+!         endif
          f = A*Tsi**4. + B*Tsi + C
          fp = 4.*A*Tsi**3. + B
          Tsi = Tsi - f/fp    
       enddo      
+
+!      write(0,*) (aKL+bKL*nn
+!     :       **3)*eps*sig*(th(1,2))**4
 
       end

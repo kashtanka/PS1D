@@ -3179,7 +3179,7 @@ c---- temporary arrays -----
        real bg(m),dbg(m),bv(m),dbv(m),tx(m),ty(m),xx,yy,zz
  
 c*********************************************************
-       write(0,*) 'tg =', tg
+       !write(0,*) 'tg =', tg
         if (ns.eq.1) then
  
          if (.not.vege) then

@@ -37,6 +37,9 @@
       if(allocated(rfl)) deallocate(rfl)
           allocate(rfl(0:nz))
           rfl=0.
+      if(allocated(flx_lw2)) deallocate(flx_lw2)
+          allocate(flx_lw2(0:nz))
+          flx_lw2=0.
       if(allocated(vat)) deallocate(vat)
           allocate(vat(0:nz))
           vat=0.

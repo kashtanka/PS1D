@@ -82,7 +82,7 @@
 !-------------SOME INPUT PARAMETERS-----------------_!
           ta_s = 0.5*(Tsi + t(1)) ! surface air temperature, K
           oa(1:nz) = 0. ! ozone mixing ratio by mass, g/g
-          co2 = 0. ! co2 mixing ratio by volume, pppv
+          co2 = 300.e-6 ! co2 mixing ratio by volume, pppv
           high = .true.  ! option (.true. slower but more accurate)
           trace = .false.  ! option (absorbtion in some minor bands)
           n2o = 0. ! n2o mixing ratio by volume, pppv
@@ -94,7 +94,7 @@
 !          nsur = 2 ! number of subgrid surface types
           fs(1,1) = 1. ! fractional cover of subgrid regions
           fs(1,2) = 0. !
-          tsurfs(1,1) = 241. !Tsi ! land or ocean surface temperature
+          tsurfs(1,1) = Tsi !Tsi ! land or ocean surface temperature
           tsurfs(1,2) = 271.35 ! land or ocean surface temperature
           eg(1,1:2,1:9) = 0.98 ! land or ocean surface emissivity
           ev(1,1:2,1:9) = 0.9 ! vegetation emissivity
@@ -105,7 +105,7 @@
           cwc(1,:,2) = qc(:,2)
           cwc(1,:,3) = qr(:,2)
           taucl(1,:,:) = 0.     ! cloud optical thickness
-          fcld(1,1:nz) = 1. ! cloud fraction
+          fcld(1,1:nz) = 0. ! cloud fraction
           ict = nz !level index separating high and middle clouds
           icb = nz ! level index separating middle and low  clouds 
           aerosol = .false. ! option to include aerosols
@@ -131,6 +131,11 @@
 !         write(0,*) flx_lw(1,1:nz)
          write(0,*) 'sfc emmis', sfcem 
 !         write(0,*) flx_lw(1,nz:1)
+         do iz = 1,nz+1
+            flx_lw2(iz) = flx_lw(1,nz+2-iz)
+            write(0,*)(flx_lw2(iz+1)-flx_lw2(iz))/(ro(iz)*cp)*(3600
+     :       *24)/dz(iz),t_lw(iz),flx_lw2(iz+1)!(flx_lw(1,iz)-flx_lw(1,iz+1))/dz(iz)*dtl
+         enddo
 !         stop
       endif
       

@@ -13,8 +13,8 @@
         enddo
       else
         do iz=1,nz
-          th(iz,3)=th(iz,1) + dtl*( difunt(iz)  )
-!     :       - Kr*exp(-(z(iz)-z_sl)/600.) )   ! LONGWAVE RADIATIVE COOLING AFTER VIHMA ET AL. 2003 
+          th(iz,3)=th(iz,1) + dtl*(difunt(iz)
+     :       - Kr*exp(-(z(iz)-z_sl)/600.) )   ! LONGWAVE RADIATIVE COOLING AFTER VIHMA ET AL. 2003 
 !-vat(iz)+rad(iz))
           !write(0,*) th(iz,3)
         enddo

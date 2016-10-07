@@ -38,7 +38,7 @@
       real(kind(0.d0)),allocatable,dimension(:)::
      : difunu,difunv,difunt,def13,def23,difk,dift,z,
      : difk2,dift2,difunqv,difunqc,difunqr,difunqci,difunqsn,
-     : def13c,def23c,dift3,difk3,dif_qc
+     : def13c,def23c,dift3,difk3,dif_qc,flx_lw2
       real(kind(0.d0)) wth_h,wth_h2,we,xint1,xint2
 !-------------MICROPHYSICS VARS AND CONSTANTS------------!   
       real(kind(0.d0)):: prec,cond2

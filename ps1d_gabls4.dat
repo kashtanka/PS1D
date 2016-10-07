@@ -1,0 +1,132 @@
+
+ps1d
+###############
+nz 400       # number of vertical grid points
+ztop 800    # height of the domain top (meters)
+ntime 259200  # total time steps
+dt 0.5     #    time step (sec)
+##### sea ice / snow model parameters ##################
+nl 25 	      # number of levels in ice layer
+ice_h 2.     # ice layer thickness (meters)
+nls 15        # number of levels in snow layer
+snow_h 0.3    # snow layer thickness (meters) (set to 0 if no snow)
+frac 0.95     # sea ice fraction
+#### vertical turbulent diffusion ###############
+# options for iodif:
+# 3 -  local (METRAS)
+# 4 -  nonlocal Troen and Mahrt (1986)
+# 5 -  nonlocal Lupkes and Schlunzen (1996)
+# 6 -  nonlocal + entrainment Noh et al. (2003) 
+# 7 -  nonlocal + entrainment Lock (2000)
+# 8 -  local (INM climate model)
+# 9 -  linear fluxes (mixed-layer model)
+#################################################
+iodif 5     #   turbulent diffusion (see options above)
+implicit .true.  # implicit scheme for diffusion, otherwise expl scheme is used
+rad_par 2   # radiation (0 - off; 1 - prescribed(DYCOMS); 2 - Goddard 
+vadv .true.  # vertical advection
+tfix 1       # constant surface temperature
+ifhle 0      # constant surface fluxes (1/0)
+seaice 0     # sea ice model coupled to atm (1/0)
+qif 0        # moisture on/off (1/0)
+ifwr 0       # cloud water and rain on/off (1/0)
+ifmf 0       # cloud snow on/off (1/0)
+icetime 10    # specific for cold air outbreaks
+###############
+pa 65100.   # pressure at the surface (Pa)
+ug  1.25     # u-geostrophic
+vg  4.5      # v-geostrophic
+phi -75.1     # latitude
+ts 241.15     # surface temperature
+###############
+#zgrid     # uncomment this to read the vertical grid from this file
+20
+50
+90
+140
+200
+270
+350
+440
+540
+##########
+inifile 1   # initial profiles: 1 - from file (see below), 0 - set in the code
+##########
+profile   #  theta u v q
+256    1       1       0       0
+53    53    53    53     # number of levels -1 in initial profs
+
+      0.0      271.31	    1.25       4.50     0	  
+      2.50     271.31       1.25       4.50     0
+      7.49     271.11       1.25       4.50     0
+     12.49     271.77       1.25       4.50     0
+     17.52     272.43       1.25       4.50     0
+     22.57     273.10       1.25       4.50     0
+     27.67     273.77       1.25       4.50     0
+     32.83     274.44       1.25       4.50     0
+     38.07     275.13       1.25       4.50     0
+     43.42     275.36       1.25       4.50     0
+     48.90     275.43       1.25       4.50     0
+     54.53     275.49       1.25       4.50     0
+     60.36     275.57       1.25       4.50     0
+     66.42     275.64       1.25       4.50     0
+     72.74     275.71       1.25       4.50     0
+     79.38     275.79       1.25       4.50     0
+     86.38     275.88       1.25       4.50     0
+     93.80     275.96       1.25       4.50     0
+    101.67     276.06       1.25       4.50     0
+    110.06     276.16       1.25       4.50     0
+    119.03     276.27       1.25       4.50     0
+    128.63     276.38       1.25       4.50     0
+    138.93     276.50       1.25       4.50     0
+    150.00     276.64       1.25       4.50     0
+    161.90     276.78       1.25       4.50     0
+    174.70     276.93       1.25       4.50     0
+    188.49     277.10       1.25       4.50     0
+    203.33     277.28       1.25       4.50     0
+    219.30     277.47       1.25       4.50     0
+    236.49     277.67       1.25       4.50     0
+    254.98     277.90       1.25       4.50     0
+    274.85     278.14       1.25       4.50     0
+    296.20     278.39       1.25       4.50     0
+    319.11     278.57       1.25       4.50     0
+    343.68     278.76       1.25       4.50     0
+    369.99     278.96       1.25       4.50     0
+    398.14     279.18       1.25       4.50     0
+    428.23     279.41       1.25       4.50     0
+    460.37     279.65       1.25       4.50     0
+    494.64     279.92       1.25       4.50     0
+    531.16     280.20       1.25       4.50     0
+    570.03     280.50       1.25       4.50     0
+    611.36     280.82       1.25       4.50     0
+    655.26     281.15       1.25       4.50     0
+    701.82     281.52       1.27       4.70     0
+    751.17     281.90       1.39       4.79     0
+    803.41     282.30       1.53       4.89     0
+    858.66     282.73       1.67       5.00     0
+    917.02     283.18       1.81       5.11     0
+    978.61     283.67       1.97       5.23     0
+   1043.53     284.17       2.13       5.35     0
+   1111.91     284.71       2.31       5.48     0
+   1185.38     285.29       2.49       5.62     0
+   1266.94     285.93       2.70       5.77     0
+#0      250.	   4.	   0  	  0
+#375    250.	   4.	   0  	  0
+#525    255.	   4.	   0  	  0
+#1525   264.	   4.	   0  	  0
+#2525   273.	   4.	   0  	  0
+#3525   282.        4.      0      0
+####################################################################
+iftf .false.
+############
+tforcing         # K/hour
+6
+
+0	-0.18
+100	-0.1875
+200	-0.1875
+400	-0.1333
+600	-0.0417
+800	0.0625
+1000	0.0625
+end
