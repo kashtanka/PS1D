@@ -10,7 +10,7 @@
       real hour2,hour3,height,LWP
       real thvflux(1:nz)
       real xxa,tflux,xt,xp,xxb,qsflux,xBf,dqsdz,dqsdz2,dqsdz3
-      real alpha
+      real alpha,theq
       integer iz
       real,external:: qsat,qsati
 
@@ -36,9 +36,9 @@
        
        !-----------writing time series------------------------!
       if(mod(nstep*dt,60.).eq.0) write(10,
-     : '(f10.1,f11.3,3f9.3,f7.4,f9.2,f9.4,f13.8,2f10.2,
+     : '(f10.1,f11.3,3f9.3,f7.4,f9.2,f10.5,f13.8,2f10.2,
      :     f11.2,f13.2,f9.3,f10.1,f10.2,f10.6,f10.6,f10.2,2f10.6
-     :     f10.2,f15.3)') !,2f10.6,f10.3,f9.3,f11.7,f10.1)')
+     :     f10.2,f15.3,f10.5)') !,2f10.6,f10.3,f9.3,f11.7,f10.1)')
 !-----------1,2,3,4--------------------------!
      : nstep*dt/60.,distY,u(1,1),v(1,1),
 !------------5,6,7---------------------------!
@@ -47,8 +47,8 @@
      : -tst_s*ust_s,-qst_s*ust_s,h,le,LWP, th(1,1),
 !-----------14,15,16,17,18,19,20-------------!
      : qv(1,1),zi_rec,delta_th,delta_qv,w_e,zi2,wthl_h,
-!-----------21,22-----------------------------!
-     : wqt_h,Tsi,(z(1)-z_sl)/dzits
+!-----------21,22,23,24---------------------------!
+     : wqt_h,Tsi,(z(1)-z_sl)/dzits,-tst_s2*ust_s2
      : !wth_h,wth_h2,we,the,tende
      
        if(mod(nstep*dt,60.).eq.0) write(16,
@@ -58,9 +58,9 @@
        !------------------------------------------------------!
        
        !-----------writing profiles---------------------------!
-       if(mod(nstep*dt,3600.).eq.0)then
+       if(mod(nstep*dt,36000.).eq.0)then
        
-        hour=nstep*dt/3600
+         hour=nstep*dt/3600
   
          if(hour.le.9) then 
             write(fileturb(27:27),'(i1)')hour
@@ -81,7 +81,7 @@
 
          open(20,file=fileprof) 
          open(21,file=fileturb)
-         open(22,file=filewater)
+         if (ifwr.ne.0) open(22,file=filewater)
          if(seaice.eq.1) open(23,file=fileice)
          do iz=0,nz
            if(iz.eq.0) height=z(0)
@@ -98,25 +98,34 @@
               dqsdz2 = 0
               dqsdz3 = 0
            endif
-              write(20,'(f7.2,5f10.4,f10.6,3f14.5,f12.6,2f12.5,3f15.9,
-     :                   f12.6,f12.4)')
-     :        height, u(iz,3),v(iz,3),
-     :        sqrt(u(iz,3)**2.+v(iz,3)**2),th(iz,3),
-     :        th(iz,3)-hlatcp*(p00/p(iz,2))**akapa*qc(iz,3), qv(iz,3),
-     :        difk(iz),dift(iz),ri(iz),rfl(iz),vat(iz),rad(iz),
-     :        difunt(iz),
-     :        dqsdz2,dqsdz3,t(iz),p(iz,2) !,sqrt((ug+dpdy(iz)/fcor)**2+vgeos(iz)**2)
+           if(ifwr.ne.0) then
+              theq = th(iz,3)-hlatcp*(p00/p(iz,2))**akapa*qc(iz,3)
+           else
+              theq = th(iz,3)
+           endif
+           
+           write(20,'(f7.2,5f10.4,f10.6,3f14.5,f12.6,2f12.5,3f15.9,
+     :              f12.6,f12.4)')
+     :          height, u(iz,3),v(iz,3),
+     :          sqrt(u(iz,3)**2.+v(iz,3)**2),th(iz,3),
+     :          theq, qv(iz,3),
+     :          difk(iz),dift(iz),ri(iz),rfl(iz),vat(iz),rad(iz),
+     :          difunt(iz),
+     :          dqsdz2,dqsdz3,t(iz),p(iz,2) !,sqrt((ug+dpdy(iz)/fcor)**2+vgeos(iz)**2)
 !------------------------ MICROPHYSICS---------------------------------!
-              write(22,'(f7.2,8f12.8,3f13.9)')
+              if(ifwr.ne.0) then
+                 write(22,'(f7.2,8f12.8,3f13.9)')
      :        height,qv(iz,3),qsat(t(iz),p(iz,2)),qsati(t(iz),p(iz,2)),
      :        qs(iz),qc(iz,2),qr(iz,2),qci(iz,2),qsn(iz,2)
      :        ,hlat/cp*(p00/p(iz,2))**akapa*condensat(iz)
      :        ,sublim(iz),difunt(iz)-
-     :    hlat/cp*difunqv(iz)
-         enddo
+     :                hlat/cp*difunqv(iz)
+              endif
+           enddo
 !------------------------TURBULENCE------------------------------------!
 !---------buoyancy flux diagnostics after Deardorff 1975---------------!
-         do iz = 2,nz
+           if (ifwr.ne.0) then
+           do iz = 2,nz
             xt = 0.5*(t(iz)+t(iz-1))
             xp = 0.5*(p(iz,2)+p(iz-1,2))
             xxb = hlat/xt/rv*qsat(xt,xp)
@@ -136,19 +145,19 @@
 !     :          HF(iz) - 0.61 * 0.5*(th(iz,3) + th(iz-1,3))*wq3(iz)
             endif
          enddo
+         endif
          do iz=2,nz
              xp = 0.5*(p(iz,2)+p(iz-1,2))
 
            xBf = (xp/p00)**akapa*
      :           (1.+0.61*0.5*(qv(iz,3)+qv(iz-1,3)-qc(iz,3)-qc(iz-1,3)))
      :  *(-h3(iz)) - 0.5*(th(iz,3)+th(iz-1,3))*(0.61*wq3(iz) - wq3c(iz))
-           write(21,'(f7.2,4f10.4,f13.8,f10.4,2f10.4,2f13.8,f10.4,
-     :                 2f13.8)') 
+           write(21,'(f7.2,4f10.4)') ! ,f13.8,f10.4,2f10.4,2f13.8,f10.4,
+!     :                 2f13.8)') 
      :     0.5*(z(iz-1)+z(iz))-z_sl*0.5,
-     :     ht(iz),mom(iz),def13(iz)+def13c(iz),def23(iz)+def23c(iz),
-     :     wq3(iz),xBf !ht(iz)-0.61*th(iz,3)*wq3(iz)+th(iz,3)*wq3c(iz)
-     :     ,HF(iz),HF2(iz),wq3(iz)+wq3c(iz),wq3c(iz),thvflux(iz),
-     :     fthl(iz),fqt(iz)
+     :     h3(iz),mom(iz),def13(iz)+def13c(iz),def23(iz)+def23c(iz) 
+     :     !,wq3(iz),xBf !ht(iz)-0.61*th(iz,3)*wq3(iz)+th(iz,3)*wq3c(iz)
+     :     !,HF(iz),HF2(iz),wq3(iz)+wq3c(iz),wq3c(iz)
          enddo
 !----------------------------------------------------------------------!
 !---------------------ICE----------------------------------------------!

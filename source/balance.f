@@ -16,8 +16,8 @@
       real nn, aKL, bKL ! nn-total cloud amount 0-1; aKL,bKL Konig-Langlo koefficients 
       real hr
       hr = nstep*dt/3600
-      if (hr.le.6) then
-         nn=1.
+      if (hr.le.48) then
+         nn=0.
 !      elseif (hr.gt.5.and.hr.le.5.5) then
 !         nn = 0.7
 !      elseif (hr.gt.5.5.and.hr.le.6) then

@@ -25,8 +25,11 @@
       else
          thv=th(1,2)
       endif
-!---------- scaling parameters--------------------!
-      wstar=(g/thv*Fv*hbl)**(1./3.)   
+!----------scaling parameters--------------------!
+c-------zatychka na vremya
+      hbl = max(hbl,10)
+c-----------------------      
+      wstar=(g/thv*abs(Fv)*hbl)**(1./3.)
       wm=(ust_s**3.+7.*z_sl/hbl*0.4
      :	*wstar**3.)**(1./3.)
       w_2s=(1.6*ust_s**2.*(1-z_sl/hbl))**(3./2.)+
@@ -35,7 +38,6 @@
       w_2s=w_2s**(2./3.)
       tstar_f=-(ust_s*tst_s+0.61*thv*ust_s*qst_s)/wstar	
       gammah_s=b_hm*wstar**2*tstar_f/w_2s/hbl
-     
        if(ust_s*tst_s.ge.0)then      ! stable stratification
          lmax=40.
          !lmax=0.15*hbl

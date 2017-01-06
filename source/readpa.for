@@ -168,11 +168,13 @@ c
      :        ,usdat(ii)
      :        ,vsdat(ii)
      :        ,qvsdat(ii)
-            write(0,*)'thdat',ii,thdat(ii)      
+            write(0,*)'thdat',ii,thdat(ii),ndat      
           enddo
-             zusdat=zthdat
-            zvsdat=zthdat
-          dzpro=zthdat(ndat)/npro
+          zusdat=zthdat
+          zvsdat=zthdat
+          write(0,*) 'here i am'  
+!          dzpro=zthdat(ndat)/npro
+          write(0,*) 'here i am'  
           pressdat(0)=pa
           write(*,*) 'Profile given'
         elseif(keyword(1:nchark).eq.'tforcing') then

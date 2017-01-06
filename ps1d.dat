@@ -1,15 +1,15 @@
 ps1d
 ###############
-nz 100      # number of vertical grid points
-ztop 1200    # height of the domain top (meters)
-ntime 108000  # total time steps
-dt 4.     #    time step (sec)
+nz 180      # number of vertical grid points
+ztop 720    # height of the domain top (meters)
+ntime 3425600  # total time steps
+dt 0.5     #    time step (sec)
 ##### sea ice / snow model parameters ##################
 nl 25 	      # number of levels in ice layer
-ice_h 1.4     # ice layer thickness (meters)
+ice_h 2.     # ice layer thickness (meters)
 nls 15        # number of levels in snow layer
-snow_h 0.    # snow layer thickness (meters) (set to 0 if no snow)
-frac 0.92     # sea ice fraction
+snow_h 0.3    # snow layer thickness (meters) (set to 0 if no snow)
+frac .93     # sea ice fraction
 #### vertical turbulent diffusion ###############
 # options for iodif:
 # 3 -  local (METRAS)
@@ -33,7 +33,7 @@ ifmf 0       # cloud snow on/off (1/0)
 icetime 10    # specific for cold air outbreaks
 ###############
 pa 100000.   # pressure at the surface (Pa)
-ug  12.     # u-geostrophic
+ug  4.     # u-geostrophic
 vg  0.      # v-geostrophic
 phi 80.     # latitude
 ts 241.15     # surface temperature
@@ -55,16 +55,16 @@ profile   #  theta u v q
 256    1       1       0       0
 10    10    10    10     # number of levels -1 in initial profs
 
-0      256.8	   12.	   0  	  0
-200    257.5	   12.	   0  	  0
-400    263.2	   12.	   0  	  0
-600    266.5	   12.	   0	  0
-800    268.3	   12.	   0  	  0
-1000   270.	   12.	   0  	  0
-2000   276.5       12.      0      0
-3000   283	   12.	   0	  0
-4000   289.5	   12.	   0	  0
-14000  359.5       12.      0      0
+0      256.8	   4.	   0  	  0
+200    257.5	   4.	   0  	  0
+400    263.2	   4.	   0  	  0
+600    266.5	   4.	   0	  0
+800    268.3	   4.	   0  	  0
+1000   270.	   4.	   0  	  0
+2000   276.5       4.      0      0
+3000   283	   4.	   0	  0
+4000   289.5	   4.	   0	  0
+14000  359.5       4.      0      0
 ####################################################################
 iftf .false.
 ############

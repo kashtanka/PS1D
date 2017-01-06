@@ -93,6 +93,7 @@
       if (seaice.eq.1.and.frac.lt.1) then
          water = 1
          ts = 271.35
+         z0 = 0.0001
          call surf_scheme3(water,
      :       ta,ts,qa,
      :       uvs,ps,z_sl,z0,
@@ -174,7 +175,7 @@
 !	  write(0,*)xsea,temp1
 	  if (xsea.eq.1) then
 	  paramzt=5
-	  paramz1=2
+	  paramz1=1
 	  else
 	  paramzt=5
 	  paramz1=1

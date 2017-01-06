@@ -4,18 +4,19 @@
       integer iz
       real sv,height,nbelow
       real*8 latentheat,sumheat,stheta,sqv,sqc,sqci,sqsn,sqr
-      
-       sv=0.
-       nbelow=0
-       do iz=1,nz
+      sv=0.
+      nbelow=0
+      do iz=1,nz
           !height=z(iz) !-z_sl
-          if(z(iz).le.hbl) then
-             sv=sv+v(iz,1)
-             nbelow=nbelow+1
-          endif
-       enddo
-       ablv=sv/nbelow 
-      
+         if(z(iz).le.hbl) then
+            sv=sv+v(iz,2)
+            nbelow=nbelow+1
+         endif
+      enddo
+c-------zatychka--------------
+      nbelow = max(nbelow,1)
+c-----------------------------      
+      ablv=sv/nbelow
        sv=0.
        sumheat=0.
        stheta=0.
@@ -32,7 +33,7 @@
      :       sbercw(iz)+ibercw(iz)+sacrr(iz)-
      :       smlt(iz)-imlt(iz)))
              sumheat=sumheat+latentheat
-             sv=sv+1./ro(iz)*(p(iz,2)-p(iz,1))/dy
+             !sv=sv+1./ro(iz)*(p(iz,2)-p(iz,1))/dy
              nbelow=nbelow+1
              stheta=stheta+th(iz,3)
              sqv=sqv+qv(iz,2)
@@ -44,6 +45,9 @@
 !     :       hlat/cp*(p00/p(iz,2))**akapa
           endif
        enddo
+c-------zatychka--------------
+      nbelow = max(nbelow,1)
+c-----------------------------
        bl_dpdy=sv/nbelow 
        cond_heat=sumheat/nbelow
        mth=stheta/nbelow

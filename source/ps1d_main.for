@@ -110,7 +110,7 @@
       if (vadv) then
          call vert_adv    ! vertical advection
       endif
-      call moment      ! integration of equations for u and v
+      call moment               ! integration of equations for u and v
       call thermo      ! integration of equation for theta    
       if (qif.ne.0) then
          call humid     ! integration of equation for qv
@@ -134,11 +134,12 @@
         enddo
       endif
  
-
 !--------Aselyn time filter for the leap-frog scheme---------!
       call aselyn       
 !------------------------------------------------------------!
-       dp=(p(1,2)-p(1,1))/dy*1000.
+      if (dy.gt.0) then
+         dp=(p(1,2)-p(1,1))/dy*1000.
+      endif   
        LWP=0.
        do iz=1,nz
          u(iz,1)=u(iz,2)

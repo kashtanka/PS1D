@@ -15,38 +15,39 @@
       dthdz=0.
       
       nlct=0
+      
       if(qif.gt.0) then
         thv=th(1,2)+0.61*th(1,2)*qv(1,2)
       else
         thv=th(1,2)
       endif
-     
-
-      do iz=2,nz
-         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+1.) then
-            hbl4=z(iz)-0.49*dz(iz)
-            !write(0,*) z(iz),th(iz,2),th(1,2)
-            goto 20
-         endif
-      enddo
+c----------------------------------------------------------
+!      do iz=2,nz    !CRASHES WHEN THERE IS NO MOISTURE
+!         if(th(iz,2)-hlat/cp*qc(iz,2).gt.th(1,2)+1.) then
+!            hbl4=z(iz)-0.49*dz(iz)
+!            goto 20
+!         endif
+!      enddo
+ 
       
- 20   do iz =3,nz-1
-         dthdz2= ((th(iz+1,2)-hlat/cp*qc(iz+1,2))
-     :  -(th(iz,2)-hlat/cp*qc(iz,2)))/(z(iz+1)-z(iz))
-      if(dthdz2.gt.0.003) then
+! 20   do iz =3,nz-1
+!         dthdz2= ((th(iz+1,2)-hlat/cp*qc(iz+1,2))
+!     :  -(th(iz,2)-hlat/cp*qc(iz,2)))/(z(iz+1)-z(iz))
+!      if(dthdz2.gt.0.003) then
 !         write(0,*) 'dth',th(iz+1,1)-th(iz,1)
 !     :   ,(th(iz+1,2)-hlat/cp*qc(iz+1,2))
 !     :    -(th(iz,2)-hlat/cp*qc(iz,2))
-      hbl1 = max(50.,z(iz+1)-(dthdz2-0.003)/
-     :	(dthdz2)
-     :    *(z(iz+1)-z(iz)))
-      mz=int(iz/2.)
-      
+!      hbl1 = max(50.,z(iz+1)-(dthdz2-0.003)/
+!     :	(dthdz2)
+!     :    *(z(iz+1)-z(iz)))
+!      mz=int(iz/2.)
+c------------------------------------------------------------      
  !     hbl1=z(iz)+0.1           !easy option, but not smooth
-      goto 30
-      endif
-      enddo
-30    continue
+ !     goto 30
+ !     endif
+ !     enddo
+!     30    continue
+c----------------------------------------------------------      
       if (seaice.eq.1.and.frac.lt.1) then
          surf_flux = frac*ust_s*tst_s + (1.-frac)*ust_s2*tst_s2
       else
@@ -118,7 +119,8 @@
       
       
      
-50    hbl=hbl1 !hbl4   !max(hbl3,hbl1)
+ 50   hbl=hbl2                  !hbl4   !max(hbl3,hbl1)
+      write(0,*) hbl
  !     write(0,*) hbl,zi_rec
 
  !     if (nstep.eq.1) then

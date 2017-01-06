@@ -1,10 +1,10 @@
-#makefile for single-column version of NH3D
-model_path= /home/dmitry/models/PS_1D/
-source_path = /home/dmitry/models/PS_1D/source
-obj_path = /home/dmitry/models/PS_1D/obj
+#makefile for the single-column model
+model_path= /home/csys/dchechin/PS1D/
+source_path = /home/csys/dchechin/PS1D/source
+obj_path = /home/csys/dchechin/PS1D/obj
 exec = ps_1d.out
-fc = ifort
-switch = -r8 -O3 -traceback
+fc = f95
+switch = -f77=tab -O3 -traceback
 obj = \
  $(obj_path)/alloc_1d_mod.o \
  $(obj_path)/ice_mod.o \

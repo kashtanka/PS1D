@@ -9,7 +9,7 @@
       if(flx.lt.flx_min) flx_min=flx
       enddo
       if(-tst_s*ust_s.gt.0) then
-      entrt=abs(flx_min/-tst_s*ust_s)
+      entrt=abs(flx_min/(-tst_s*ust_s))
       else
       entrt=0.
       endif
