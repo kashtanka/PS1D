@@ -14,7 +14,7 @@
          endif
       enddo
 c-------zatychka--------------
-      nbelow = max(nbelow,1)
+      nbelow = max(nbelow,1.)
 c-----------------------------      
       ablv=sv/nbelow
        sv=0.
@@ -46,7 +46,7 @@ c-----------------------------
           endif
        enddo
 c-------zatychka--------------
-      nbelow = max(nbelow,1)
+      nbelow = max(nbelow,1.)
 c-----------------------------
        bl_dpdy=sv/nbelow 
        cond_heat=sumheat/nbelow

@@ -22,18 +22,20 @@
 !     :                (gabls_ts(i+1) - gabls_ts(i))
 !              endif
 !           enddo
-!          if(dt*nstep.lt.3600*icetime) then
-!             ts = 250.
-!             water = 0.
-!          else
-!             ts = 273.15
-!             water = 1.
-!          endif
+          if(dt*nstep.lt.3600*icetime) then
+             ts = 291.
+             water = 0.
+             z1 = 0.5
+          else
+             ts = 281.
+             water = 1.
+             z1 = 0.001
+          endif
            
       endif
       
  !     ts=235.
-      z0=0.001
+!      z0=0.001
 !      if(dt*nstep.lt.3600*40) then
 !      z0=0.0185*(max(ust_s,1.e-6))**2./g
 !      ts=290.
@@ -175,13 +177,13 @@
 !	  write(0,*)xsea,temp1
 	  if (xsea.eq.1) then
 	  paramzt=5
-	  paramz1=1
+	  paramz1=2
 	  else
 	  paramzt=5
 	  paramz1=1
 	  endif
 	  conv=0
-	  param_uf=1.
+	  param_uf=1
 	  metras=1
 	!-----------------------------------------------------------------------------!
 	  p00=1.e5

@@ -205,6 +205,9 @@
       if(allocated(ri)) deallocate(ri)
           allocate(ri(0:nz))
           ri=0.
+      if(allocated(shear)) deallocate(shear)
+          allocate(shear(0:nz))
+          shear=0.
       if(allocated(difk)) deallocate(difk)
           allocate(difk(0:nz))
           difk=0.

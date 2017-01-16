@@ -1,10 +1,10 @@
 #makefile for the single-column model
-model_path= /home/csys/dchechin/PS1D/
-source_path = /home/csys/dchechin/PS1D/source
-obj_path = /home/csys/dchechin/PS1D/obj
+model_path= /home/dmitry/models/PS_1D/
+source_path = /home/dmitry/models/PS_1D/source
+obj_path = /home/dmitry/models/PS_1D/obj
 exec = ps_1d.out
-fc = f95
-switch = -f77=tab -O3 -traceback
+fc = ifort
+switch = -r8 -O3 -traceback
 obj = \
  $(obj_path)/alloc_1d_mod.o \
  $(obj_path)/ice_mod.o \
@@ -31,6 +31,7 @@ obj = \
  $(obj_path)/balance.o \
  $(obj_path)/const_fluxes.o \
  $(obj_path)/diffu_local.o \
+ $(obj_path)/richardson.o \
  $(obj_path)/diffu_LS96.o \
  $(obj_path)/diffu_Noh03.o \
  $(obj_path)/diffu_TM86.o \
@@ -52,8 +53,8 @@ $(exec) : $(obj)
 #MODULES:
 $(obj_path)/alloc_1d_mod.o : $(source_path)/alloc_1d_mod.for
 	cd $(obj_path)/ && $(fc) -c $(switch) $(source_path)/alloc_1d_mod.for && cd $(model_path)
-$(obj_path)/alloc_1d_mod.o : $(source_path)/ice_mod.f
-	cd $(obj_path)/ && $(fc) -c $(switch) $(source_path)/alloc_1d_mod.for && cd $(model_path)
+$(obj_path)/ice_mod.o : $(source_path)/ice_mod.f
+	cd $(obj_path)/ && $(fc) -c $(switch) $(source_path)/ice_mod.f && cd $(model_path)
 #OTHER SOURCE
 $(obj_path)/%.o : $(source_path)/%.for
 	cd $(obj_path)/ && $(fc) -c $(switch) $< && cd $(model_path)

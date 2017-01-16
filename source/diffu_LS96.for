@@ -27,7 +27,7 @@
       endif
 !----------scaling parameters--------------------!
 c-------zatychka na vremya
-      hbl = max(hbl,10)
+      hbl = max(hbl,10.)
 c-----------------------      
       wstar=(g/thv*abs(Fv)*hbl)**(1./3.)
       wm=(ust_s**3.+7.*z_sl/hbl*0.4
@@ -79,7 +79,7 @@ c-----------------------
         f_ri = (1.+5.*rich+44.*rich**2.)**(-2.) !(max(0. , 1.-5.*rich))**2.
         difk_st =  mixl**2.*def*f_ri !max(b,f_ri)
 !        f_ri = (max(0. , 1.-5.*rich))**2.
- !       difk_st = mixl**2.*def*max(b,f_ri)
+!        difk_st = mixl**2.*def*max(b,f_ri)
         if (Fv.le.0) then 
            if(rich.ge.0) then
               difk(iz) = difk_st
@@ -295,7 +295,7 @@ c-----------------------
       endif
       
 !      do iz=1,nz
-!      write(0,*) iz,difunt2(iz),difunt(iz)
+!      write(0,*) iz,difunt2(iz),difunt(iz)iu
 !      enddo
 
       difunu(1:nz)=difunu2

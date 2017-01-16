@@ -30,7 +30,7 @@
      :   ,tedat,dz,th0,h3,u0,v0,sh3,qv0,h3c,h3e,ug_bar,ht,mom,wq3,
      :   t,ro,qc0,qr0,dpdy,vgeos,qci0,qsn0,condensat,sublim,w,
      :   vat,rad,rfl,vaq,vaqc,vau,vav,wq3_c,wq3e,ri,zfc,tfc,tfcdat,
-     :   vat2,vaq2,vaqc2,HF,HF2,fthl,fqt
+     :   vat2,vaq2,vaqc2,HF,HF2,fthl,fqt,shear
       real(kind(0.d0)),allocatable,dimension(:,:)::
      : u,v,th,qv,p     
       real(kind(0.d0)),allocatable,dimension(:,:)::
