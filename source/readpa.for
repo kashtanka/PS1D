@@ -193,6 +193,11 @@ c
            write(0,*) gabls_tim(i),gabls_ts(i)
         enddo
         close(31)
+
+        open(41,file='wind.dat')
+        read(41,*) ug
+        usdat = ug
+        close(41)
       end subroutine readpa
       
       subroutine allocref

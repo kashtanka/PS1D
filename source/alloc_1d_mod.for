@@ -17,7 +17,7 @@
       real(kind(0.d0)):: z_sl,ztop,distY,distYice,icetime,the,tende
       real(kind(0.d0)):: ablv,dy,p0,dpdy_d,phi,ptop,bl_dpdy
       real(kind(0.d0)):: cond_heat,mth,mqv,mqc,mqr,mqci,mqsn
-      real(kind(0.d0)):: frac
+      real(kind(0.d0)):: frac,th2m
       real(kind(0.d0)):: gabls_tim(37),gabls_ts(37)
       parameter(r=287.05,cp=1005.,g=9.8066,akapa=r/cp,p00=1.e5,
      :          omega=7.2921e-5,pi=3.141593,hlat=2.501e6,
@@ -30,7 +30,7 @@
      :   ,tedat,dz,th0,h3,u0,v0,sh3,qv0,h3c,h3e,ug_bar,ht,mom,wq3,
      :   t,ro,qc0,qr0,dpdy,vgeos,qci0,qsn0,condensat,sublim,w,
      :   vat,rad,rfl,vaq,vaqc,vau,vav,wq3_c,wq3e,ri,zfc,tfc,tfcdat,
-     :   vat2,vaq2,vaqc2,HF,HF2,fthl,fqt,shear
+     :   vat2,vaq2,vaqc2,HF,HF2,fthl,fqt,shear,phl
       real(kind(0.d0)),allocatable,dimension(:,:)::
      : u,v,th,qv,p     
       real(kind(0.d0)),allocatable,dimension(:,:)::
@@ -38,8 +38,8 @@
       real(kind(0.d0)),allocatable,dimension(:)::
      : difunu,difunv,difunt,def13,def23,difk,dift,z,
      : difk2,dift2,difunqv,difunqc,difunqr,difunqci,difunqsn,
-     : def13c,def23c,dift3,difk3,dif_qc,flx_lw2
-      real(kind(0.d0)) wth_h,wth_h2,we,xint1,xint2
+     : def13c,def23c,dift3,difk3,dif_qc,flx_lw2,lwdif
+      real(kind(0.d0)) wth_h,wth_h2,we,xint1,xint2,LW
 !-------------MICROPHYSICS VARS AND CONSTANTS------------!   
       real(kind(0.d0)):: prec,cond2
       real(kind(0.d0)),allocatable,dimension(:)::

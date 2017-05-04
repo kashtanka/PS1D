@@ -478,6 +478,7 @@ c     the factor 6.081 is equal to 1800/296
  
       do k=1,np
        do i=1,m
+         ! write(0,*) pl(i,k),ta(i,k),wa(i,k)
  
          dp   (i,k) = pl(i,k+1)-pl(i,k)
  

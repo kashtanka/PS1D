@@ -5,7 +5,8 @@
      : snow_h
       use alloc_1d, only:
      : th,ro,cp,ust_s,tst_s,
-     : u,v,ust_s2,tst_s2,nstep,dt
+     : u,v,ust_s2,tst_s2,nstep,dt,LW,
+     :  rad_par
       implicit none
       real A,B,C
       integer i
@@ -16,19 +17,12 @@
       real nn, aKL, bKL ! nn-total cloud amount 0-1; aKL,bKL Konig-Langlo koefficients 
       real hr
       hr = nstep*dt/3600
-      if (hr.le.48) then
-         nn=0.
-!      elseif (hr.gt.5.and.hr.le.5.5) then
-!         nn = 0.7
-!      elseif (hr.gt.5.5.and.hr.le.6) then
-!         nn = 0.5
-!      elseif(hr.gt.6.and.hr.le.6.5) then
-!         nn = 0.25
-!      elseif(hr.gt.6.5.and.hr.le.7) then
-!         nn = 0.1
-      else
-         nn = 0.
-      endif
+!      if (hr.le.48) then
+!         nn=0.
+!      else
+!         nn = 0.
+!      endif
+      nn = 0.9
       aKL=0.765
       bKL=0.22 
 
@@ -44,25 +38,31 @@
          dz = dzi
       endif
 !-------first guess---------------------!      
-      Tsi = T1
-!--------begin iteration----------------!
+      if(nstep.eq.1) Tsi = T1
+!--------begin iteration----------------! 
+!      do i = 1,5
+!         call surf_layer_t
+!         Ch = - tst_s*ust_s/(uvs*(Tsi-th(1,2)))
+!         A = eps*sig
+!         B = ro(1)*cp*Ch*uvs + K_th/(0.5*dz)
+!         C = -ro(1)*cp*Ch*th(1,2)*uvs - K_th/(0.5*dz)*T1 - (aKL+bKL*nn
+!     :       **3)*eps*sig*(th(1,2))**4
+!         f = A*Tsi**4. + B*Tsi + C
+!         fp = 4.*A*Tsi**3. + B
+!         Tsi = Tsi - f/fp    
+!      enddo      
+
+cccc-  VERSION2 WHERE LW BALANCE IS PRESCRIBED -cccc
+      if(rad_par.ne.2) then
+      LW = -eps*sig*Tsi**4. + (aKL+bKL*nn**3)
+     :       *eps*sig*(th(1,2))**4
+      endif
       do i = 1,5
          call surf_layer_t
          Ch = - tst_s*ust_s/(uvs*(Tsi-th(1,2)))
-         A = eps*sig
-         B = ro(1)*cp*Ch*uvs + K_th/(0.5*dz)
-!         if (hr.le.6) then
-         C = -ro(1)*cp*Ch*th(1,2)*uvs - K_th/(0.5*dz)*T1 - (aKL+bKL*nn
-     :       **3)*eps*sig*(th(1,2))**4
-!         else
-!         C = -ro(1)*cp*Ch*th(1,2)*uvs - K_th/(0.5*dz)*T1 - 150 
-!         endif
-         f = A*Tsi**4. + B*Tsi + C
-         fp = 4.*A*Tsi**3. + B
-         Tsi = Tsi - f/fp    
-      enddo      
-
-!      write(0,*) (aKL+bKL*nn
-!     :       **3)*eps*sig*(th(1,2))**4
-
+         Tsi = (LW + K_th/(0.5*dz)*T1 + 
+     :         ro(1)*cp*Ch*th(1,2)*uvs)/
+     :          (ro(1)*cp*Ch*uvs + K_th/(0.5*dz))
+      enddo
+   ! write(0,*) Tsi
       end

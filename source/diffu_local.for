@@ -46,7 +46,7 @@
 !  etc.
       karm=0.4      ! von Karman constant
       zero=1.e-8    ! minumum vertical wind shear
-      b=0.00000001 ! 0.005  ! fixed value for F(Ri) for strongly-stable stratification
+      b=0.005 ! 0.005  ! fixed value for F(Ri) for strongly-stable stratification
       mix_length = 1 ! 1 - Blackadar original; 2 - Sorbjan's modification
 !-----------CONSERVATIVE VARIABLES--------------------------------!
       do iz = 1,nz
@@ -81,12 +81,12 @@
          endif
 !-------------------------------------------!       
 	 if(ri(iz).ge.0) then
-            fri = max(b,(1.-5.*ri(iz)))**2.
+!            fri = max(b,(1.-5.*ri(iz)))**2.
             fri = (1.+5.*ri(iz)+44.*ri(iz)**2.)**(-2.)
-            fri_m = (1.+300.*ri(iz)**2.)**(-3./2.)
-            fri_h = 1./0.9/(1.+250.*ri(iz))**(3./2.)
-            difk(iz)=mixl**2.*shear(iz)*fri_m
-	    dift(iz)=mixl**2.*shear(iz)*fri_h !difk(iz)
+            !fri_m = (1.+300.*ri(iz)**2.)**(-3./2.)
+            !fri_h = 1./0.9/(1.+250.*ri(iz))**(3./2.)
+            difk(iz)=mixl**2.*shear(iz)*fri
+	    dift(iz)=mixl**2.*shear(iz)*fri !difk(iz)
 !             write(0,*) z(iz),dift(iz),difk(iz)
 	 endif
 	 if(ri(iz).lt.0) then

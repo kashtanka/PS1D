@@ -94,7 +94,6 @@
       !---calculate initial pressure profile to define ptop given pa----!
       !    pressure is calculated using hydrostatic equation and
       !    definition of potential temperature. 
-      !    Newton method is used for iteration
       
       p(1,2)=pa   !known value
       write(0,*) p(1,2)
@@ -136,9 +135,9 @@
       t(iz)=th(iz,2)*(p(iz,2)/p00)**akapa
       write(0,*) z(iz),p(iz,2),t(iz)
       !if (qif.ne.0) then
-      qv(iz,1)=0.3*qsati(t(iz),p(iz,1))
-      qv(iz,2)=0.3*qsati(t(iz),p(iz,1))
-      qv(iz,3)=0.3*qsati(t(iz),p(iz,1))
+!      qv(iz,1)=0.8*qsati(t(iz),p(iz,1))
+!      qv(iz,2)=0.8*qsati(t(iz),p(iz,1))
+!      qv(iz,3)=0.8*qsati(t(iz),p(iz,1))
       !endif
       !vgeos(iz)=z(iz)/z(nz)*vg
       !v(iz,1)=vgeos(iz)

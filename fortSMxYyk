@@ -1,0 +1,27 @@
+ 600     # number of vertical grid points                                     
+ 2400    # height of the domain top (meters)                                
+ 3456000  # total time steps                                               
+ 0.1     #    time step (sec)                                                 
+ 25 	      # number of levels in ice layer                                    
+ 2.     # ice layer thickness (meters)                                     
+ 15        # number of levels in snow layer                                  
+ 0.3    # snow layer thickness (meters) (set to 0 if no snow)             
+ 1     # sea ice fraction                                                   
+ 3     #   turbulent diffusion (see options above)                         
+ .true.  # implicit scheme for diffusion, otherwise expl scheme is used 
+ 2   # radiation (0 - off; 1 - prescribed(DYCOMS); 2 - Goddard           
+ .true.  # vertical advection                                               
+ 0       # constant surface temperature                                     
+ 0      # constant surface fluxes (1/0)                                    
+ 1     # sea ice model coupled to atm (1/0)                               
+ 0        # moisture on/off (1/0)                                            
+ 0       # cloud water and rain on/off (1/0)                                
+ 0       # cloud snow on/off (1/0)                                          
+ 10    # specific for cold air outbreaks                                 
+ 100000.   # pressure at the surface (Pa)                                     
+  15.     # u-geostrophic                                                     
+  0.      # v-geostrophic                                                     
+ 80.     # latitude                                                          
+ 241.15     # surface temperature                                             
+ 1   # initial profiles: 1 - from file (see below), 0 - set in the code  
+   #  theta u v q                                                        

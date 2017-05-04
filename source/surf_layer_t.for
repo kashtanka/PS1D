@@ -7,12 +7,14 @@
      : Ribulk,dzita,rhoa,z1,tau,water,tems,ustar,Tstar,
      : qstar,temsfc
       real,external:: qsat
+      real ah,bh,B_h,ch,zet2m,Psi,zt,zetzt,Psi2
       integer i
       
       water=0.
       ta=th(1,2)
       if (seaice.eq.1) then
          ts = Tsi
+         z0 = 0.001
 	else
 !           ts=290.
 !           do i = 1,36
@@ -22,16 +24,18 @@
 !     :                (gabls_ts(i+1) - gabls_ts(i))
 !              endif
 !           enddo
-          if(dt*nstep.lt.3600*icetime) then
-             ts = 291.
-             water = 0.
-             z1 = 0.5
-          else
-             ts = 281.
-             water = 1.
-             z1 = 0.001
-          endif
-           
+!          if(dt*nstep.lt.3600*icetime) then
+!             ts = 291.
+!             water = 0.
+!             z1 = 0.5
+!          else
+!             ts = 281.
+!             water = 1.
+!             z1 = 0.001
+!          endif
+           ts = 290.
+           water = 0
+           z1 = 0.5
       endif
       
  !     ts=235.
@@ -77,7 +81,7 @@
      :       ta,ts,qa,
      :       uvs,ps,z_sl,z0,
      :       cdu,hflux,Elatent,ustar,qif,Ribulk,dzita,Tstar,rhoa,z1
-     :       ,tau,qstar)
+     :       ,tau,qstar,zt)
      
       cdm=cdu
       ust_s=ustar
@@ -91,6 +95,25 @@
       h=hflux
       le=Elatent
       Fv=-ust_s*tst_s-0.61*t(1)*ust_s*qst_s
+! diagnosing Th2m from Th at the lowest level
+      ah=5.
+      bh=5.
+      B_h=sqrt(5.)
+      ch=3.
+       if(seaice.eq.1.and.tst_s.gt.0) then
+          zet2m = dzits/z_sl*6.
+          zetzt = dzits/z_sl*zt
+          Psi = -bh/2.*dlog(1+ch*zet2m+zet2m**2)+
+     :           (-ah/B_h+bh*ch/(2.*B_h))*(dlog((2.*zet2m+ch-B_h)
+     :           /(2*zet2m+ch+B_h))-dlog((ch-B_h)/(ch+B_h)))
+          Psi2 = -bh/2.*dlog(1+ch*zetzt+zetzt**2)+
+     :           (-ah/B_h+bh*ch/(2.*B_h))*(dlog((2.*zetzt+ch-B_h)
+     :           /(2*zetzt+ch+B_h))-dlog((ch-B_h)/(ch+B_h)))
+          th2m = Tsi + tst_s/0.4*(log(2/zt) - Psi +Psi2)
+!          write(0,*) th2m,th(1,2),Tsi,dzits,zet2m
+       else
+          th2m = 0.
+       endif
       
       if (seaice.eq.1.and.frac.lt.1) then
          water = 1
@@ -100,7 +123,7 @@
      :       ta,ts,qa,
      :       uvs,ps,z_sl,z0,
      :       cdu,hflux,Elatent,ustar,qif,Ribulk,dzita,Tstar,rhoa,z1
-     :       ,tau,qstar)
+     :       ,tau,qstar,zt)
 
          cdm2 = cdu
          ust_s2 = ustar
@@ -125,12 +148,13 @@
           Fv2 = 0.
          
        endif
+
          
       end
       
       subroutine surf_scheme3(xsea,temp2,temp1,q2,uv2,p,z2,z0,cdu,hflux,
      :	                   Elatent,ustar,qif,Ribulk,dzita,Tstar,ro,z1,
-     :                     tau,qstar)
+     :                     tau,qstar,zt)
 	implicit none
 	real(8) t2,t1,q2,u2,p,z2,z1,xsea
 	real(8) k,g,pi,cp,nu,Le,Lsub,z0min,aMagw,bMagw,
@@ -175,213 +199,209 @@
 	  ! 0 - off
 	  !*****************************************************************************! 
 !	  write(0,*)xsea,temp1
-	  if (xsea.eq.1) then
-	  paramzt=5
-	  paramz1=2
-	  else
-	  paramzt=5
-	  paramz1=1
-	  endif
-	  conv=0
-	  param_uf=1
-	  metras=1
+      if (xsea.eq.1) then
+         paramzt=5
+         paramz1=1
+      else
+         paramzt=5
+         paramz1=1
+      endif
+      conv=0
+      param_uf=1
+      metras=1
 	!-----------------------------------------------------------------------------!
-	  p00=1.e5
-	  k=0.4
-	  g=9.81
-	  pi=3.14159
-	  cp=1005.
-	  nu=1.5/10**5
-	  Le=2.501e6
-	  Lsub=2.837e6
-	  z0min=1.5e-5
-	  aMagw = 7.6326   ! coefficient for Magnus formula for water surface
-      bMagw = 241.9      ! coefficient for Magnus formula for water surface
-      aMagi = 9.5        ! coefficient for Magnus formula for ice   surface
-      bMagi = 265.5      ! coefficient for Magnus formula for ice   surface
-	  !----------------SHEBA const---------------!
-	  am=5.
-	  ah=5.
-	  bm=am/6.5
-	  bh=5.
-	  B_m=((1-bm)/bm)**(1./3.)
-	  B_h=sqrt(5.)
-	  ch=3.
-	  !------------------------------------------!
-	
-	  iter=0.
-	  u1=0.
-	  t1=temp1
-	  t2=temp2
-	  u2=uv2
-	  if(u2.eq.0) u2=0.1
-	  z1=max(z0,0.00001)
-!	  if(t1.ge.273.15) then
-        if(t1.ge.273.15.or.xsea.gt.0) then
-	  l1=0.
-	  else
-	  l1=1.
-	  endif	  
-	  if(l1.eq.0.) then
-	  aMag=aMagw
-	  bMag=bMagw
-	  else
-        aMag=aMagi
-	  bMag=bMagi
-	  endif
-	  
+      p00=1.e5
+      k=0.4
+      g=9.81
+      pi=3.14159
+      cp=1005.
+      nu=1.5/10**5
+      Le=2.501e6
+      Lsub=2.837e6
+      z0min=1.5e-5
+      aMagw = 7.6326            ! coefficient for Magnus formula for water surface
+      bMagw = 241.9             ! coefficient for Magnus formula for water surface
+      aMagi = 9.5               ! coefficient for Magnus formula for ice   surface
+      bMagi = 265.5             ! coefficient for Magnus formula for ice   surface
+!----------------SHEBA const---------------!
+      am=5.
+      ah=5.
+      bm=am/6.5
+      bh=5.
+      B_m=((1-bm)/bm)**(1./3.)
+      B_h=sqrt(5.)
+      ch=3.
+!------------------------------------------!
+      iter=0.
+      u1=0.
+      t1=temp1
+      t2=temp2
+      u2=uv2
+      if(u2.eq.0) u2=0.1
+      z1=max(z0,0.00001)
+!     if(t1.ge.273.15) then
+      if(t1.ge.273.15.or.xsea.gt.0) then
+         l1=0.
+      else
+         l1=1.
+      endif	  
+      if(l1.eq.0.) then
+         aMag=aMagw
+         bMag=bMagw
+      else
+         aMag=aMagi
+         bMag=bMagi
+      endif
 !	  t1=t1*(p00/p)**0.286      ! t1 - fixed real surface temperature (T) being
 	                            ! converted into potential temperature (theta)
 !	  t2=t2**(p00/p)**0.286
-        esat1= 610.7*10.**(aMag*(t1-273.15)/(bMag+(t1-273.15)))
-        q1  = 0.622/p*esat1
+      esat1= 610.7*10.**(aMag*(t1-273.15)/(bMag+(t1-273.15)))
+      q1  = 0.622/p*esat1
 
-	  Tsr=(t1+t2)/2.
-	  dT=t2-t1
-	  if(qif.gt.0) then
-	  dq=q2-q1
-	else
-	  dq=0.
-	q1=0.
-	q2=0.
-	  endif
-	  dU=u2-u1
-	  !-------Bulk Richardson Number------------!
-        Ribulk=z2*g*((t2*(1.+0.61*q2))-(t1*(1.+0.61*q1)))
-     :  /(0.5*(t1*(1.+0.61*q1)+t2*(1.+0.61*q2)))/u2**2
-	  !
-	  !-------DEFINE STRATIFICATION-------------!
-	  ! 1 - stable
-	  ! 2 - unstable
-	  ! neutral is not necessary
-	  !-----------------------------------------!
-	  if(dT+0.61*dq*Tsr.gt.0.) strat=1           
-	  if(dT+0.61*dq*Tsr.le.0.) strat=2     
-        !-----------------------------------------!
-	if (strat.eq.1) then   
-	  L=10000.    
-20	  iter=iter+1
-        dzita2=z2/L
-	  dzita1=z1/L
+      Tsr=(t1+t2)/2.
+      dT=t2-t1
+      if(qif.gt.0) then
+         dq=q2-q1
+      else
+         dq=0.
+         q1=0.
+         q2=0.
+      endif
+      dU=u2-u1
+!-------Bulk Richardson Number------------!
+      Ribulk=z2*g*((t2*(1.+0.61*q2))-(t1*(1.+0.61*q1)))
+     :     /(0.5*(t1*(1.+0.61*q1)+t2*(1.+0.61*q2)))/u2**2
+!
+!-------DEFINE STRATIFICATION-------------!
+! 1 - stable
+! 2 - unstable
+! neutral is not necessary
+!-----------------------------------------!
+      if(dT+0.61*dq*Tsr.gt.0.) strat=1           
+      if(dT+0.61*dq*Tsr.le.0.) strat=2     
+!-----------------------------------------!
+      if (strat.eq.1) then   
+         L=10000.    
+ 20      iter=iter+1
+         dzita2=z2/L
+         dzita1=z1/L
 
-	                     ! STABLE STRATIFICATION
-      if(param_uf==1) then
-	   xst1=(1.+dzita1)**(1./3.)
-	   xst2=(1.+dzita2)**(1./3.)
-	   unifU1=-3.*am/bm*(xst1-1)+am*B_m/(2.*bm)*(2*dlog((xst1+B_m)
-     :   /(1+B_m))-dlog((xst1**2-xst1*B_m+B_m**2)/(1-B_m+B_m**2))
-     :   +2*sqrt(3.)*(atan((2.*xst1-B_m)/(sqrt(3.)*B_m))
-     :   -atan((2.-B_m)/(sqrt(3.)*B_m))))
-	   unifU2=-3.*am/bm*(xst2-1)+am*B_m/(2.*bm)*(2*dlog((xst2+B_m)
-     :   /(1+B_m))-dlog((xst2**2-xst1*B_m+B_m**2)/(1-B_m+B_m**2))
-     :   +2*sqrt(3.)*(atan((2.*xst2-B_m)/(sqrt(3.)*B_m))
-     :   -atan((2.-B_m)/(sqrt(3.)*B_m))))
+! STABLE STRATIFICATION
+         if(param_uf==1) then
+            xst1=(1.+dzita1)**(1./3.)
+            xst2=(1.+dzita2)**(1./3.)
+            unifU1=-3.*am/bm*(xst1-1)+am*B_m/(2.*bm)*(2*dlog((xst1+B_m)
+     :          /(1+B_m))-dlog((xst1**2-xst1*B_m+B_m**2)/(1-B_m+B_m**2))
+     :           +2*sqrt(3.)*(atan((2.*xst1-B_m)/(sqrt(3.)*B_m))
+     :           -atan((2.-B_m)/(sqrt(3.)*B_m))))
+            unifU2=-3.*am/bm*(xst2-1)+am*B_m/(2.*bm)*(2*dlog((xst2+B_m)
+     :          /(1+B_m))-dlog((xst2**2-xst1*B_m+B_m**2)/(1-B_m+B_m**2))
+     :           +2*sqrt(3.)*(atan((2.*xst2-B_m)/(sqrt(3.)*B_m))
+     :           -atan((2.-B_m)/(sqrt(3.)*B_m))))
 	 else if(param_uf==2) then
-	   unifU1=-(1.*dzita1+0.667*(dzita1-5./0.35)
-     :   *dexp(-0.35*dzita1)+0.667*5./0.35)
-	   unifU2=-(1.*dzita2+0.667*(dzita2-5./0.35)
-     :   *dexp(-0.35*dzita2)+0.667*5./0.35)
+            unifU1=-(1.*dzita1+0.667*(dzita1-5./0.35)
+     :           *dexp(-0.35*dzita1)+0.667*5./0.35)
+            unifU2=-(1.*dzita2+0.667*(dzita2-5./0.35)
+     :           *dexp(-0.35*dzita2)+0.667*5./0.35)
 	 else if(param_uf==3) then
-	   unifU1=-6.1*dlog(dzita1+(1+dzita1**2.5)**(1./2.5))
-	   unifU2=-6.1*dlog(dzita2+(1+dzita2**2.5)**(1./2.5))
+            unifU1=-6.1*dlog(dzita1+(1+dzita1**2.5)**(1./2.5))
+            unifU2=-6.1*dlog(dzita2+(1+dzita2**2.5)**(1./2.5))
 	 else if(param_uf==4) then
-	   unifU1=-5.*dzita1
-	   unifU2=-5.*dzita2
-!           write(0,*) unifU2
-      
+            unifU1=-5.*dzita1
+            unifU2=-5.*dzita2
 	 else if(param_uf==5) then
-	   unifU1=-(3.*dzita1**(5./6.))
-	   unifU2=-(3.*dzita2**(5./6.))
+            unifU1=-(3.*dzita1**(5./6.))
+            unifU2=-(3.*dzita2**(5./6.))
 	 else if(param_uf==6) then
-         unifU1=-(0.7*dzita1+0.75*(dzita1-5./0.35)
-     :   *dexp(-0.35*dzita1)+0.75*5./0.35)
-	   unifU2=-(0.7*dzita2+0.75*(dzita2-5./0.35)
-     :   *dexp(-0.35*dzita2)+0.75*5./0.35)
-       else if(param_uf==7) then
-	   unifU1=-4.8*dzita1
-	   unifU2=-4.8*dzita2
-	   endif
-       ustar=k*dU/(dlog(z2/z1)-unifU2+unifU1)
+            unifU1=-(0.7*dzita1+0.75*(dzita1-5./0.35)
+     :           *dexp(-0.35*dzita1)+0.75*5./0.35)
+            unifU2=-(0.7*dzita2+0.75*(dzita2-5./0.35)
+     :           *dexp(-0.35*dzita2)+0.75*5./0.35)
+         else if(param_uf==7) then
+            unifU1=-4.8*dzita1
+            unifU2=-4.8*dzita2
+         endif
+         ustar=k*dU/(dlog(z2/z1)-unifU2+unifU1)
 	 if(paramz1.eq.1) then
-	   z1=z1
+            z1=z1
 	 elseif (paramz1.eq.2) then
-	  z1=0.0185*ustar**2./g
+            z1=0.0185*ustar**2./g
 	 elseif (paramz1.eq.3) then
-	   z1 = dmin1(dmax1(0.111*nu/ustar + 
-     :   0.0144*ustar**2./g, 1.d-5),1.1d-1)
+            z1 = dmin1(dmax1(0.111*nu/ustar + 
+     :           0.0144*ustar**2./g, 1.d-5),1.1d-1)
 	 endif
-	  R=ustar*z1/nu
-	  if (R.lt.0.135) then
-	  b0=1.25
-	  b1=0.
-	  b2=0.
-	  endif
-	  if(R.gt.0.135.and.R.lt.2.5) then
-	  b0=0.149
-	  b1=-0.55
-	  b2=0.
-	  endif
-	  if(R.gt.2.5) then
-	  b0=0.317
-	  b1=-0.565
-	  b2=-0.183
-	  endif
-	  if (paramzt.eq.0) zt=z1
-	  if (paramzt.eq.1) zt=z1/exp(6.5)
-	  if (paramzt.eq.2) zt=z1/exp(0.13*R**0.45)
-	  if (paramzt.eq.3) zt=z1*exp(b0+b1*dlog(R)+b2*(dlog(R))**2.)
-	  if (paramzt.eq.4) then
-	  if(R .le. 0.111) then
-			xx = - 2.43
-		else
-			if(0.111 .lt. R .and. R .le. 16.3) then
-				xx = 0.83*log(R) - 0.6
-			else
-				xx = 0.49 * R**0.45
-			end if
-		end if
-		zt = z1*exp(-xx)
-		endif
-	  if (paramzt.eq.5) zt=0.1*z1
-	  dzita1T=zt/L
-	  if (param_uf==1) then
-	  unifT1=-bh/2.*dlog(1+ch*dzita1T+dzita1T**2)+
-     :  (-ah/B_h+bh*ch/(2.*B_h))*(dlog((2.*dzita1T+ch-B_h)
-     :  /(2*dzita1T+ch+B_h))-dlog((ch-B_h)/(ch+B_h)))
-        unifT2=-bh/2.*dlog(1+ch*dzita2+dzita2**2)+
-     :  (-ah/B_h+bh*ch/(2.*B_h))*(dlog((2.*dzita2+ch-B_h)
-     :  /(2*dzita2+ch+B_h))-dlog((ch-B_h)/(ch+B_h)))
-	  else if(param_uf==2) then
-	  unifT1=-((1.+2./3.*1.*dzita1T)**(3./2.)+
-     :  0.667*(dzita1T-5./0.35)*exp(-0.35*dzita1T)+0.667*5./0.35-1.)
-        unifT2=-((1+2./3.*1.*dzita2)**(3./2.)+
-     :  0.667*(dzita2-5./0.35)*exp(-0.35*dzita2)+0.667*5./0.35-1.)
-	  else if (param_uf==3) then
-	  unifT1=-5.3*dlog(dzita1T+(1.+dzita1T**1.1)**(1./1.1))
-        unifT2=-5.3*dlog(dzita2+(1.+dzita2**1.1)**(1./1.1))
-	  else if (param_uf==4) then
-	  unifT1=-5.*dzita1T
-        unifT2=-5.*dzita2
-	  else if (param_uf==5) then
-	  unifT1=-(2.5*dzita1T**(4./5.))
-        unifT2=-(2.5*dzita2**(4./5.))
-        else if (param_uf==6) then
-	  unifT1=-(0.7*dzita1T+0.75*(dzita1T-5./0.35)
-     :  *dexp(-0.35*dzita1T)+0.75*5./0.35)
-        unifT2=-(0.7*dzita2+0.75*(dzita2-5./0.35)
-     :  *dexp(-0.35*dzita2)+0.75*5./0.35)
-        else if (param_uf==7) then
-	  unifT1=-7.8*dzita1T
-        unifT2=-7.8*dzita2
-	  endif
-	  unifq1=unifT1
-	  unifq2=unifT2
-	  Tstar=(k)*dT/(dlog(z2/zt)-unifT2+unifT1)
-	  qstar=k*dq/(dlog(z2/zt)-unifq2+unifq1)
-	  Lit=ustar**2/(k*g*(Tstar+0.61*Tsr*qstar))*Tsr
-	  Lit = sign(1.,Lit)*max(abs(Lit),1.e-7) 
-	  dL=dabs(L-Lit)
-
+         R=ustar*z1/nu
+         if (R.lt.0.135) then
+            b0=1.25
+            b1=0.
+            b2=0.
+         endif
+         if(R.gt.0.135.and.R.lt.2.5) then
+            b0=0.149
+            b1=-0.55
+            b2=0.
+         endif
+         if(R.gt.2.5) then
+            b0=0.317
+            b1=-0.565
+            b2=-0.183
+         endif
+         if (paramzt.eq.0) zt=z1
+         if (paramzt.eq.1) zt=z1/exp(6.5)
+         if (paramzt.eq.2) zt=z1/exp(0.13*R**0.45)
+         if (paramzt.eq.3) zt=z1*exp(b0+b1*dlog(R)+b2*(dlog(R))**2.)
+         if (paramzt.eq.4) then
+            if(R .le. 0.111) then
+               xx = - 2.43
+            else
+               if(0.111 .lt. R .and. R .le. 16.3) then
+                  xx = 0.83*log(R) - 0.6
+               else
+                  xx = 0.49 * R**0.45
+               end if
+            end if
+            zt = z1*exp(-xx)
+         endif
+         if (paramzt.eq.5) zt=0.1*z1
+         dzita1T=zt/L
+         if (param_uf==1) then
+            unifT1=-bh/2.*dlog(1+ch*dzita1T+dzita1T**2)+
+     :           (-ah/B_h+bh*ch/(2.*B_h))*(dlog((2.*dzita1T+ch-B_h)
+     :           /(2*dzita1T+ch+B_h))-dlog((ch-B_h)/(ch+B_h)))
+            unifT2=-bh/2.*dlog(1+ch*dzita2+dzita2**2)+
+     :           (-ah/B_h+bh*ch/(2.*B_h))*(dlog((2.*dzita2+ch-B_h)
+     :           /(2*dzita2+ch+B_h))-dlog((ch-B_h)/(ch+B_h)))
+         else if(param_uf==2) then
+            unifT1=-((1.+2./3.*1.*dzita1T)**(3./2.)+
+     :      0.667*(dzita1T-5./0.35)*exp(-0.35*dzita1T)+0.667*5./0.35-1.)
+            unifT2=-((1+2./3.*1.*dzita2)**(3./2.)+
+     :        0.667*(dzita2-5./0.35)*exp(-0.35*dzita2)+0.667*5./0.35-1.)
+         else if (param_uf==3) then
+            unifT1=-5.3*dlog(dzita1T+(1.+dzita1T**1.1)**(1./1.1))
+            unifT2=-5.3*dlog(dzita2+(1.+dzita2**1.1)**(1./1.1))
+         else if (param_uf==4) then
+            unifT1=-5.*dzita1T
+            unifT2=-5.*dzita2
+         else if (param_uf==5) then
+            unifT1=-(2.5*dzita1T**(4./5.))
+            unifT2=-(2.5*dzita2**(4./5.))
+         else if (param_uf==6) then
+            unifT1=-(0.7*dzita1T+0.75*(dzita1T-5./0.35)
+     :           *dexp(-0.35*dzita1T)+0.75*5./0.35)
+            unifT2=-(0.7*dzita2+0.75*(dzita2-5./0.35)
+     :           *dexp(-0.35*dzita2)+0.75*5./0.35)
+         else if (param_uf==7) then
+            unifT1=-7.8*dzita1T
+            unifT2=-7.8*dzita2
+         endif
+         unifq1=unifT1
+         unifq2=unifT2
+         Tstar=(k)*dT/(dlog(z2/zt)-unifT2+unifT1)
+         qstar=k*dq/(dlog(z2/zt)-unifq2+unifq1)
+         Lit=ustar**2/(k*g*(Tstar+0.61*Tsr*qstar))*Tsr
+         Lit = sign(1.,Lit)*max(abs(Lit),1.e-7) 
+         dL=dabs(L-Lit)
+         
 	  if (iter.gt.25) goto 33
 	  
 	  if (dL.lt.5) then
@@ -721,10 +741,6 @@
 	  tau=ro*ustar**2
 	  cdu=ustar**2/u2
 	  dzita=dzita2
-
-!	write(*,*) 'surf_layer',dzita,dT
-
-	  
 	  iter=0
 	  
 31    continue

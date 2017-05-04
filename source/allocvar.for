@@ -70,6 +70,9 @@
       if(allocated(p)) deallocate(p)
           allocate(p(0:nz,1:2))
           p=0.
+      if(allocated(phl)) deallocate(phl)
+          allocate(phl(0:nz))
+          phl=0.
       if(allocated(t)) deallocate(t)
           allocate(t(0:nz))
           t=0.
@@ -85,6 +88,9 @@
       if(allocated(difunu)) deallocate(difunu)
           allocate(difunu(0:nz))
           difunu=0.
+      if(allocated(lwdif)) deallocate(lwdif)
+          allocate(lwdif(0:nz))
+          lwdif=0.
       if(allocated(condensat)) deallocate(condensat)
           allocate(condensat(0:nz))
           condensat=0.

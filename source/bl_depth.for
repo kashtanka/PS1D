@@ -72,9 +72,10 @@ c----------------------------------------------------------
       
  40   continue
       
-      do i=1,3
-      hbl=hbl3
-      if(i.eq.1)hbl=hbl1
+!      do i=1,3
+!      hbl=hbl3
+!      if(i.eq.1)hbl=hbl1
+      hbl = hbl2
       
       wstar=(g/thv*Fv*hbl)**(1./3.)
       ws_m=(ust_s**3.+7.*karm*wstar**3.*0.5)**(1./3.)
@@ -91,7 +92,7 @@ c----------------------------------------------------------
 !      endif
 !      enddo
       
-      enddo
+!      enddo
 
 !     diagnostics of cloud top height and 
 !     bottom level of top-down diffusion
